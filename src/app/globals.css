@@ -1,0 +1,159 @@
+/* ── Reset & base ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ── iOS auto-zoom prevention ──────────────────────────────────────────
+   iOS WebKit auto-zooms the viewport whenever a focused form control has
+   a computed font-size below 16px. Forcing 16px on touch devices stops
+   the zoom without blocking pinch-to-zoom (we never set maximum-scale).
+   `pointer: coarse` targets touchscreens and leaves desktop sizes alone.
+*/
+@media (pointer: coarse) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ── MLG main-site design DNA (mlg-site parity) ────────────────────── */
+:root {
+  --teal:    #00B2CC;
+  --teal-d:  #0095AD;
+  --teal-l:  #cce9ef;
+  --teal-xl: #e6f7fb;
+  --navy:    #0D173B;
+  --ink:     #1A1A1A;
+  --black1:  #1A1A1A;
+  --black2:  #323232;
+  --mut:     #7a7f8c;
+  --slate:   #64748b;
+  --line:    #e8eaee;
+  --border:  #e2e8f0;
+  --off:     #f7f8fa;
+  --bg:      #f7f8fa;
+}
+
+body { font-family: 'Poppins', sans-serif; font-weight: 300; color: var(--ink); background: #fff; }
+h1, h2, h3, .jk { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* ── Layout helpers ────────────────────────────────────────────────── */
+.sec  { padding: 88px 0; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+.serif { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* ── Typography ────────────────────────────────────────────────────── */
+.eyebrow {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 10px;
+}
+.h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(28px, 3.2vw, 38px);
+  font-weight: 700; line-height: 1.18; letter-spacing: -.3px; color: var(--navy);
+}
+.h2 em { font-style: italic; font-weight: 500; color: var(--teal); }
+.rule   { width: 72px; height: 2px; background: var(--teal); border-radius: 2px; }
+.rule-c { width: 72px; height: 2px; background: var(--teal); border-radius: 2px; margin: 0 auto; }
+
+/* ── Navigation ────────────────────────────────────────────────────── */
+.nav-a {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 500; color: var(--ink);
+  text-decoration: none; transition: color .15s ease; cursor: pointer;
+  position: relative; padding: 10px 0; line-height: 1;
+}
+.nav-a::after {
+  content: ''; position: absolute; left: 0; bottom: 2px;
+  width: 0; height: 2px; background: var(--teal); border-radius: 2px;
+  transition: width .2s ease;
+}
+.nav-a:hover { color: var(--ink); }
+.nav-a:hover::after { width: 100%; }
+.nav-w { color: var(--ink); }
+.nav-w:hover { color: var(--ink) !important; }
+
+/* Logo responsive sizing */
+.mlg-logo { height: 44px; width: auto; }
+
+/* ── Buttons — mothership pills ────────────────────────────────────── */
+.btn {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: .02em;
+  border: none; border-radius: 99px;
+  padding: 13px 28px; cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
+  text-decoration: none; display: inline-block;
+}
+.btn-teal { background: var(--teal); color: var(--navy); }
+.btn-teal:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0,178,204,.34); }
+.btn-navy { background: var(--navy); color: #fff; }
+.btn-navy:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(13,23,59,.30); }
+.btn-ot  { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); padding: 11.5px 28px; }
+.btn-ot:hover  { background: var(--navy); color: #fff; }
+.btn-ow  { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.65); padding: 11.5px 28px; }
+.btn-ow:hover  { background: #fff; color: var(--navy); border-color: #fff; }
+
+/* ── Cards — rounded, soft-lift ────────────────────────────────────── */
+.card { background: #fff; border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: all .15s; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.12); }
+.fp-card { padding: 18px; cursor: pointer; }
+.fp-card.on { background: var(--teal-xl); border-color: var(--teal); }
+.lcard { overflow: hidden; }
+.lcard:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.12); }
+
+/* ── Inputs ────────────────────────────────────────────────────────── */
+input, textarea {
+  font-family: 'Poppins', sans-serif;
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--black2); padding: 12px 16px; font-size: 13px;
+  width: 100%; outline: none; transition: border-color .2s;
+}
+input:focus, textarea:focus { border-color: var(--teal); }
+input::placeholder, textarea::placeholder { color: var(--slate); font-size: 12px; }
+
+/* ── Floating stat card (mothership signature) ─────────────────────── */
+.statwrap { margin: -56px auto 0; position: relative; z-index: 2; max-width: 1140px; padding: 0 24px; }
+.stats { background: #fff; border-radius: 14px; display: grid; grid-template-columns: repeat(4,1fr); text-align: center; padding: 26px 0; box-shadow: 0 14px 44px rgba(13,23,59,.10); }
+.stats > div + div { border-left: 1px solid var(--line); }
+.stats .n { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 700; color: var(--navy); line-height: 1; }
+.stats .l { font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--mut); margin-top: 7px; font-weight: 400; }
+
+/* ── Chat bubbles ───────────────────────────────────────────────────── */
+.cb-u {
+  background: var(--teal); color: #fff; padding: 9px 13px;
+  border-radius: 14px 14px 2px 14px; font-size: 12px;
+  margin-left: auto; max-width: 80%; text-align: right;
+}
+.cb-a {
+  background: var(--off); border: 1px solid var(--border);
+  padding: 9px 13px; border-radius: 14px 14px 14px 2px;
+  font-size: 12px; max-width: 85%; color: var(--black2);
+}
+
+/* ── Animations ────────────────────────────────────────────────────── */
+@keyframes fu { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.fu  { animation: fu .7s ease forwards; }
+.fu1 { animation: fu .7s .12s ease forwards; opacity: 0; }
+.fu2 { animation: fu .7s .24s ease forwards; opacity: 0; }
+.fu3 { animation: fu .7s .36s ease forwards; opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .fu, .fu1, .fu2, .fu3 { animation: none; opacity: 1; }
+}
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .wrap  { padding: 0 20px; }
+  .sec   { padding: 60px 0; }
+  .g2    { grid-template-columns: 1fr !important; }
+  .s4    { grid-template-columns: repeat(2, 1fr) !important; }
+  .a4    { grid-template-columns: 1fr 1fr !important; }
+  .fp4   { grid-template-columns: repeat(2, 1fr) !important; }
+  .l3    { grid-template-columns: 1fr !important; }
+  .ft3   { grid-template-columns: 1fr !important; }
+  .stats { grid-template-columns: repeat(2, 1fr) !important; row-gap: 18px; }
+  .stats > div + div { border-left: none; }
+
+  /* ── Header mobile rules (used by Header.tsx) ── */
+  .nav-d { display: none !important; }
+  .ham   { display: flex !important; }
+}

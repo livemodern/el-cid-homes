@@ -1,6 +1,22 @@
-/node_modules
-/.next
-/out
+# Dependencies
+node_modules/
+
+# Next.js build artifacts
+.next/
+out/
+tsconfig.tsbuildinfo
+
+# Env
 .env*.local
+.env
+
+# Vercel
+.vercel
+
+# OS
 .DS_Store
+
+# Logs
 *.log
+npm-debug.log*
+.env.r2
