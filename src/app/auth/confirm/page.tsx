@@ -9,8 +9,8 @@
 // Our auth is localStorage-based and client-side (see lib/auth.ts), so we
 // verify the OTP in the browser with the same getSupabase() client the rest
 // of the app uses. That establishes the session in localStorage exactly like
-// the OAuth path, then we hand off to /auth/callback for the shared profile /
-// phone-capture step and the final redirect. Nothing in this flow ever shows
+// the OAuth path, then we hand off to /auth/callback for the shared session
+// establishment and final redirect. Nothing in this flow ever shows
 // the user a supabase.co URL.
 
 import { useEffect, useState, Suspense } from 'react';
@@ -65,7 +65,7 @@ function Inner() {
       }
 
       // Session is live in localStorage. Hand off to the shared callback tail
-      // (profile completeness + phone capture + final redirect).
+      // (session establishment + final redirect).
       router.replace('/auth/callback?verified=1');
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

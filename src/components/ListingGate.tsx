@@ -4,7 +4,7 @@
 // distinct listing the blocking AuthModal (signup) appears. Signed-in
 // users never see it. Threshold is CMS-driven (config.registration).
 import { useEffect, useState } from 'react';
-import { recordView } from '@/lib/view-tracker';
+import { recordView, recordViewToServer } from '@/lib/view-tracker';
 import { useUser } from '@/lib/auth';
 import { AuthModal } from '@/components/AuthModal';
 
@@ -16,6 +16,14 @@ export default function ListingGate({ mlsId, limit, enabled }: { mlsId: string; 
   useEffect(() => {
     if (mlsId) setCount(recordView(String(mlsId)));
   }, [mlsId]);
+
+  // Signed-in users: persist each view live (flush only covers the
+  // pre-registration backlog). Patrick 2026-07-10.
+  useEffect(() => {
+    if (mlsId && !loading && user) {
+      recordViewToServer(String(mlsId), 'el-cid-homes');
+    }
+  }, [mlsId, loading, user]);
 
   const signedIn = !!user || justSignedIn;
   const show = enabled && !loading && !signedIn && limit > 0 && count >= limit;

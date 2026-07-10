@@ -3,6 +3,7 @@
 // ─── AuthModal — sign in / sign up overlay ───────────────────────────
 import { useState, useEffect } from 'react';
 import { signUp, signIn, getSupabase } from '@/lib/auth';
+import { flushViewsToServer } from '@/lib/view-tracker';
 import SmsConsentDisclosure, { SMS_CONSENT_TEXT } from '@/components/SmsConsentDisclosure';
 
 const TEAL    = '#00B2CC';
@@ -112,6 +113,7 @@ export function AuthModal({
         });
         if (error) { setError(error.message); setBusy(false); return; }
       }
+      try { await flushViewsToServer(siteSlug); } catch { /* non-blocking */ }
       onClose('signed-in');
     } catch (e: any) {
       setError(e?.message || 'Something went wrong. Please try again.');

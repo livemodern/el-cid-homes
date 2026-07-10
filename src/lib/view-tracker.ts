@@ -53,6 +53,64 @@ export function clearViewedCount(): void {
   // No-op for now. Keeping history is more valuable than resetting.
 }
 
+// ─── Flush pre-registration views to the server (on signup) ──────────
+// Pre-signup listing views were only ever in localStorage (paywall
+// counter) and never sent to the server, so a visitor who browsed 2-3
+// listings then registered had none of those early views attributed to
+// their new contact. On successful auth, POST each localStorage mls_id to
+// /api/me/viewed (persists to property_views + fires FUB event) as the
+// new user. Idempotent, best-effort, keepalive. Patrick 2026-07-10.
+export async function flushViewsToServer(siteSlug: string): Promise<number> {
+  if (typeof window === 'undefined') return 0;
+  const ids = readViewed();
+  if (ids.length === 0) return 0;
+  let token: string | null = null;
+  try {
+    const sb = getSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    token = session?.access_token ?? null;
+  } catch { /* no session */ }
+  if (!token) return 0;
+  let flushed = 0;
+  await Promise.all(ids.map(async (mls_id) => {
+    try {
+      const res = await fetch('/api/me/viewed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ mls_id: String(mls_id), site_slug: siteSlug }),
+        keepalive: true,
+      });
+      if (res.ok) flushed += 1;
+    } catch { /* best-effort */ }
+  }));
+  return flushed;
+}
+
+// ─── Record a SINGLE view to the server (for logged-in users) ─────────
+// The flush only fires once at signup (pre-reg backlog). Signed-in users
+// viewing listings afterward also need each view persisted; recordView()
+// is localStorage-only, so ListingGate calls this when the user is signed
+// in. Best-effort, RPC-deduped. Patrick 2026-07-10.
+export async function recordViewToServer(mlsId: string, siteSlug: string): Promise<boolean> {
+  if (typeof window === 'undefined' || !mlsId) return false;
+  let token: string | null = null;
+  try {
+    const sb = getSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    token = session?.access_token ?? null;
+  } catch { /* not signed in */ }
+  if (!token) return false;
+  try {
+    const res = await fetch('/api/me/viewed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ mls_id: String(mlsId), site_slug: siteSlug }),
+      keepalive: true,
+    });
+    return res.ok;
+  } catch { return false; }
+}
+
 // ─── Settings (cached) ────────────────────────────────────────────────
 // Reads `site_settings` from Supabase. Tries per-site key first
 // (`listing_view_limit:<slug>`), falls back to the shared
