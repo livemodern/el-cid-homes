@@ -45,6 +45,12 @@ export function getViewCount(): number {
   return readViewed().length;
 }
 
+// The full list of listing mls_ids this visitor has viewed — passed to the
+// routing engine so a registration routes on real browsing intent.
+export function getViewedListings(): string[] {
+  return readViewed();
+}
+
 // Called after successful signup. Doesn't actually clear — keeps the
 // history so we know what they saw before registering (useful for the
 // admin / FUB feed of "what listings did this lead browse"), but the

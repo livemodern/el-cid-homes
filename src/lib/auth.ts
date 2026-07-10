@@ -155,6 +155,12 @@ export async function signUp(args: {
         smsConsentText: smsConsent ? (smsConsentText || null) : null,
         isRegistration: true,
         source: 'Registration',
+        // Browsing history (pre-registration) so the routing engine can compute
+        // dominant type + median price + area and route on real intent. Read
+        // localStorage inline to avoid a circular import with view-tracker.
+        viewedMlsIds: (() => {
+          try { const r = window.localStorage.getItem('mlg.viewed_listings'); return r ? JSON.parse(r) : []; } catch { return []; }
+        })(),
       }),
     }).catch(() => {}); // fire-and-forget
   } catch {}

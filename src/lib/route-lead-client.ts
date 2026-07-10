@@ -28,6 +28,9 @@ export interface RouteLeadInput {
   }
   tags?: string[]
   meta?: Record<string, unknown>
+  // Browsing signals for the enrichment brain (mlg-admin computes the profile).
+  viewedMlsIds?: (string | number)[]
+  userType?: string
 }
 
 export interface RouteLeadResult {

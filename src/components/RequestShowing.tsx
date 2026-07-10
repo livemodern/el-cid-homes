@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, FormEvent } from 'react'
+import { getViewedListings } from '@/lib/view-tracker';
 import { useUser, getSupabase } from '@/lib/auth'
 
 // Restored from the prior TCP listing page: the inline showing-request widget
@@ -71,6 +72,7 @@ export default function RequestShowing({ listing }: { listing: any }) {
           listing: listing?.street_address,
           mls_id: listing?.mls_id,
           listPrice: listing?.list_price,
+          viewedMlsIds: getViewedListings(),
           siteSlug: 'el-cid-homes',
         }),
       })

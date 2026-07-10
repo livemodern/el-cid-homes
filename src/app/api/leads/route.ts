@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
       // What best describes you (Buyer/Seller/Investor/etc.) — used as a
       // tag AND the structured contacts.client_type post-FUB write.
       userType,
+      // Pre-registration browsing history from the client (localStorage) — fed
+      // to the routing engine's enrichment brain.
+      viewedMlsIds,
     } = body;
 
     if (!email && !phone) {
@@ -99,6 +102,8 @@ export async function POST(req: NextRequest) {
             actionTag,
             ...(userTypeTag.length ? userTypeTag : []),
           ].filter(Boolean),
+          userType: typeof userType === 'string' ? userType : undefined,
+          viewedMlsIds: Array.isArray(viewedMlsIds) ? viewedMlsIds : undefined,
           meta: {
             action: actionTag,
             message: message || null,

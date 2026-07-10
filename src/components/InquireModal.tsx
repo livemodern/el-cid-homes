@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useUser, getSupabase } from '@/lib/auth';
 import { AuthModal } from '@/components/AuthModal';
+import { getViewedListings } from '@/lib/view-tracker';
 import SmsConsentDisclosure, { SMS_CONSENT_TEXT } from '@/components/SmsConsentDisclosure';
 
 const TEAL    = '#00B2CC';
@@ -152,6 +153,7 @@ export function InquireModal({ open, onClose, listing, siteSlug = 'el-cid-homes'
           mls_id:     listing?.mls_id,
           listing:    listing?.street_address,
           listPrice:  listing?.list_price,
+          viewedMlsIds: getViewedListings(),
           siteSlug,
           smsConsent,
           smsConsentText: smsConsent ? SMS_CONSENT_TEXT : null,
