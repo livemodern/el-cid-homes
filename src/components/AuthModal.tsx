@@ -274,6 +274,11 @@ export function AuthModal({
                       setError(null);
                       try {
                         localStorage.setItem('mlg-auth-next', window.location.pathname + window.location.search);
+                        // Back target for the post-OAuth back-button guard: the
+                        // in-site page the user was on BEFORE this one (route
+                        // tracker in AuthBackGuard), so Back after signing in
+                        // skips Google's history entries. Patrick 2026-07-11.
+                        sessionStorage.setItem('mlg-auth-back', sessionStorage.getItem('mlg-prev-path') || '/listings');
                       } catch {}
                       const redirectTo = `${window.location.origin}/auth/callback`;
                       const { data, error: oerr } = await getSupabase().auth.signInWithOAuth({

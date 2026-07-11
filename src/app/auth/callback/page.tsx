@@ -47,6 +47,7 @@ function Inner() {
     const providerError = hp.get('error_description') || hp.get('error') || qp.get('error_description') || qp.get('error');
 
     if (providerError) {
+      try { sessionStorage.removeItem('mlg-auth-back'); } catch {}
       router.replace(`/?auth_error=${encodeURIComponent(providerError)}`);
       return;
     }
@@ -71,7 +72,10 @@ function Inner() {
           // the session in localStorage, then forwarded here. Proceed if a
           // session exists; only error if it doesn't.
           const { data: { session: existing } } = await sb.auth.getSession();
-          if (existing) { router.replace(next); return; }
+          if (existing) {
+            try { sessionStorage.setItem('mlg-auth-landed', '1'); } catch {}
+            router.replace(next); return;
+          }
           router.replace('/?auth_error=missing_credentials');
           return;
         }
@@ -85,6 +89,10 @@ function Inner() {
 
       // Session is live — send them where they were headed. No profile /
       // phone-capture step: phone is captured at registration for everyone.
+      // Flag the landing so AuthBackGuard arms the back-button fix (one Back
+      // press returns to the pre-login page, skipping Google's history
+      // entries). Patrick 2026-07-11.
+      try { sessionStorage.setItem('mlg-auth-landed', '1'); } catch {}
       router.replace(next);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

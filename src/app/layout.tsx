@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 // FubPixel removed 2026-07-08 — matches mlg-site 5d849cf + TCP b15977f4.
 // FUB downstream; server-side push from mlg-site 074fd0b handles view sync.
 // import FubPixel from '@/components/FubPixel';
+import { AuthBackGuard } from '@/components/AuthBackGuard';
 
 // Single source of truth for the public domain + index gate. At cutover set
 // NEXT_PUBLIC_SITE_URL=https://elcidhomes.com and SITE_INDEXABLE=true
@@ -121,6 +122,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body style={{ margin: 0, padding: 0, background: '#0a0a0a' }}>
         <Header logo={logo} />
+        <AuthBackGuard />
         {children}
         <Footer />
         {/* FUB Widget Tracker — REMOVED 2026-07-08. FUB downstream now;
