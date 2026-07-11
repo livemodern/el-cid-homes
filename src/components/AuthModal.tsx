@@ -278,7 +278,7 @@ export function AuthModal({
                         // in-site page the user was on BEFORE this one (route
                         // tracker in AuthBackGuard), so Back after signing in
                         // skips Google's history entries. Patrick 2026-07-11.
-                        sessionStorage.setItem('mlg-auth-back', sessionStorage.getItem('mlg-prev-path') || '/listings');
+                        sessionStorage.setItem('mlg-auth-back', sessionStorage.getItem('mlg-prev-path') || '/for-sale');
                       } catch {}
                       const redirectTo = `${window.location.origin}/auth/callback`;
                       const { data, error: oerr } = await getSupabase().auth.signInWithOAuth({

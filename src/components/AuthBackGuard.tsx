@@ -59,9 +59,9 @@ export function AuthBackGuard() {
     try { window.history.pushState(null, '', window.location.href); } catch { return; }
 
     const onPop = () => {
-      let target = '/listings';
+      let target = '/for-sale';
       try {
-        target = sessionStorage.getItem('mlg-auth-back') || '/listings';
+        target = sessionStorage.getItem('mlg-auth-back') || '/for-sale';
         sessionStorage.removeItem('mlg-auth-back');
       } catch {}
       // replace() so the Google entry we're sitting on is overwritten with
