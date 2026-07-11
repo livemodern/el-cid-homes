@@ -33,11 +33,26 @@ export function AuthBackGuard() {
   const currentRef = useRef<string | null>(null);
 
   // Route tracker: keep the PREVIOUS in-site URL in sessionStorage so the
-  // AuthModal can stash it as the back target at sign-in time.
+  // AuthModal can stash it as the back target at sign-in time. Two sources:
+  // soft (SPA) transitions via the pathname effect below, and HARD
+  // navigations via document.referrer on mount — the mini-site listing
+  // cards are plain <a> links, so most page-to-page moves are full loads
+  // where usePathname never sees the previous route.
   useEffect(() => {
     const full = pathname + (typeof window !== 'undefined' ? window.location.search : '');
     if (currentRef.current && currentRef.current !== full) {
       try { sessionStorage.setItem('mlg-prev-path', currentRef.current); } catch {}
+    } else if (!currentRef.current) {
+      // Fresh document (hard nav / first load): recover the previous page
+      // from the referrer when it's same-origin and a different path.
+      try {
+        if (document.referrer) {
+          const ref = new URL(document.referrer);
+          if (ref.origin === window.location.origin && (ref.pathname + ref.search) !== full) {
+            sessionStorage.setItem('mlg-prev-path', ref.pathname + ref.search);
+          }
+        }
+      } catch {}
     }
     currentRef.current = full;
   }, [pathname]);
