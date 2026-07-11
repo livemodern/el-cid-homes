@@ -97,6 +97,25 @@ export async function signUp(args: {
   const { email, password, firstName, lastName, phone, siteSlug, userType, smsConsent, smsConsentText } = args;
 
   // 1) Create auth user. Supabase handles password hashing, email confirm.
+    // 0.5) Registration verification gate (Patrick 2026-07-11) — central
+  // verifier: Telnyx Number Lookup (number must be in service), email MX +
+  // disposable checks, Claude verdict on obvious fakes. FAIL-OPEN.
+  try {
+    const vRes = await fetch('/api/register/verify/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName, lastName, email, phone }),
+    });
+    if (vRes.ok) {
+      const v = await vRes.json() as { ok?: boolean; fieldErrors?: Record<string, string> };
+      if (v.ok === false && v.fieldErrors && Object.keys(v.fieldErrors).length > 0) {
+        const msg = v.fieldErrors.phone || v.fieldErrors.email || v.fieldErrors.name
+          || 'Please double-check your information and try again.';
+        return { error: { code: 'verification', message: msg } as any };
+      }
+    }
+  } catch { /* fail open */ }
+
   const { data, error } = await sb.auth.signUp({
     email,
     password,
