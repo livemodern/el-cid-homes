@@ -175,24 +175,12 @@ export async function POST(req: NextRequest) {
             if (ag?.fub_id != null) {
               await updatePerson(personId, { assignedUserId: ag.fub_id });
 
-              // Post @-mention note IMMEDIATELY after PUT — FUB person definitely
-              // exists, and the routed agent is the FUB owner. FUB's mobile app
-              // pushes a notification to the @-mentioned user. Mention requires
-              // the FULL FUB user name verbatim. Patrick 2026-06-27.
-              if (ag.name) {
-                const display = [first, last].filter(Boolean).join(' ') || email || 'New lead';
-                const phoneLine = phone ? ` · ${phone}` : '';
-                const srcLine   = ` · elcidhomes.com (${isRegistration ? 'registration' : 'inquiry'})`;
-                const listingLine = (listing || mls_id)
-                  ? `\nProperty: ${[listing, mls_id ? `MLS# ${mls_id}` : null].filter(Boolean).join(' · ')}`
-                  : '';
-                const noteBody = `@${ag.name} 🔔 NEW LEAD assigned to you\n${display}${phoneLine}${srcLine}${listingLine}`;
-                try {
-                  await postNote(personId, noteBody);
-                } catch (e) {
-                  console.warn('FUB @-mention note failed (non-fatal):', e);
-                }
-              }
+              // FUB @-mention note CUT (Patrick 2026-07-11): fully redundant — the
+              // central routing engine (notifyAgentOfNewLead) already fires native
+              // agent alerts on every lead: Resend email (office CC), CRM bell, and
+              // Telnyx SMS (LEAD_NOTIFY_SMS live, SMS_PROVIDER=telnyx — runtime-
+              // verified). The FUB owner PUT above stays: that's downstream
+              // assignment sync, not a notification.
             }
           }
         }
