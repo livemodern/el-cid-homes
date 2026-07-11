@@ -83,10 +83,11 @@ export async function POST(req: NextRequest) {
         // stamp them as the FUB person's owner below (overriding FUB's
         // own lead-flow group assignment). Patrick 2026-06-25.
         // Source is 'el-cid-homes'; community_slug 'el-cid-west-palm-beach'
-        // carries the neighborhood context so the community Featured-agent
-        // pin (Patrick Lafferty) resolves and owns every El Cid lead. Action
-        // type ('registration', 'contact-form', etc.) goes into tags for
-        // audit + tag-based rule matching.
+        // carries the neighborhood context so community/geo rules resolve. The
+        // featured-agent pin is DISPLAY ONLY — it does not route leads. El Cid
+        // leads route via the rule engine (site rule -> Luxury Buyers, or the
+        // seller/renter peel-offs). Action type ('registration', etc.) + the
+        // computed sale/lease + client-type tags drive rule matching.
         const actionTag = isRegistration ? 'registration' : (source || 'contact-form');
         const routing = await recordLeadRouting({
           source: 'el-cid-homes',
