@@ -31,6 +31,25 @@ export async function POST(req: NextRequest) {
     p_site_slug: site_slug,
   });
 
+  // 1b. Also write a native site_events listing_view. The external pixel
+  // can't stamp auth on mini-sites (user_id stays null), so mini visits
+  // never reached the CRM timeline ("Returned to <site>"), the Seen chip,
+  // or session analytics. This authed endpoint IS the reliable signal —
+  // stamping user_id here lights up the whole existing downstream (timeline
+  // ORs on user_ids instantly; the 15-min backfill cron stamps contact_id
+  // and advances last_on_site_at). Best-effort. Patrick 2026-07-11.
+  try {
+    await sb.from('site_events').insert({
+      site_slug,
+      event_type: 'listing_view',
+      page_path: `/listings/${mls_id}`,
+      page_url: `${req.nextUrl.origin}/listings/${mls_id}`,
+      user_id: user.id,
+      occurred_at: new Date().toISOString(),
+      data: { mls_id: String(mls_id) },
+    });
+  } catch { /* view already recorded in property_views */ }
+
   // 2. Send "Viewed Property" event to FUB (fire-and-forget)
   // Only fires if user has email — anonymous/partial accounts skip
   if (user.email) {
