@@ -255,8 +255,22 @@ async function upsertPersonAndLogActivity(
   personPayload: Record<string, any>,
   noteBody: string,
 ): Promise<number | undefined> {
-  const data = await fubFetch('/people', { method: 'POST', body: JSON.stringify(personPayload) });
-  const personId = extractPersonId(data);
+  // ONE CONTACT PER EMAIL. FUB's POST /people does NOT reliably merge by email
+  // on this account (a single email has spawned multiple persons), so we look
+  // the person up ourselves first. If they already exist we log the activity
+  // note under them and DO NOT re-push the payload — re-pushing would reset a
+  // returning client's stage/tags/source. Create only when there's no match.
+  // Ported from mlg-site fub-events.ts (2026-07-11 fix). 2026-07-12.
+  const email = (personPayload?.emails?.[0]?.value as string | undefined)?.trim();
+  let personId: number | undefined;
+  if (email) {
+    const existing = await findPersonByEmail(email);
+    if (existing) personId = existing;
+  }
+  if (!personId) {
+    const data = await fubFetch('/people', { method: 'POST', body: JSON.stringify(personPayload) });
+    personId = extractPersonId(data);
+  }
   if (personId && noteBody) {
     try {
       await fubFetch('/notes', {
