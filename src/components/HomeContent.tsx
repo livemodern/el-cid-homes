@@ -304,10 +304,12 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
                      sizes by WIDTH — so a 960-wide variant of a landscape source yields
                      only ~440-640px of HEIGHT, and object-fit:cover then has to upscale
                      it 113-215% to fill 683px (1366px on a retina screen). That is the
-                     blur. 2048 wide gives a 3:2 source ~1365px of height: a straight
-                     downscale, zero upscale, sharp at 2x. Cloudflare serves AVIF so the
+                     blur. 2560 wide gives a 3:2 source ~1700px of height: a straight
+                     downscale, zero upscale, sharp at 2x. (2048 left the 2500px-wide
+                     sources 18% short, because Cloudflare never upscales past the
+                     original — the height you get is width/aspect, capped at source.) Cloudflare serves AVIF so the
                      byte cost is small. */
-                  src={imgOpt(loc.image || hero.image, 2048)} alt={`${title} location`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  src={imgOpt(loc.image || hero.image, 2560)} alt={`${title} location`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                 <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14, background: 'rgba(13,23,59,.92)', padding: '14px 18px', borderRadius: 12 }}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 15, fontWeight: 700, color: '#fff' }}>{title}</div>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 9.5, fontWeight: 600, color: 'var(--teal)', letterSpacing: '.18em', marginTop: 4 }}>HISTORIC DISTRICT &middot; WEST PALM BEACH, FL</div>
