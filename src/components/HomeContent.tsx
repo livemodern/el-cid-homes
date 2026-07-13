@@ -349,7 +349,15 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured }: {
             <div className="tm2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 22, maxWidth: 720, margin: '0 auto' }}>
               {team.map((a: any, i: number) => (
                 <div key={i} className="card" style={{ overflow: 'hidden' }}>
-                  <div style={{ height: 280, background: a.image ? `url(${imgOpt(a.image, 640)})` : 'linear-gradient(135deg,var(--navy),#1a2a5e)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                  <div style={{ height: 280, background: a.image ? `url(${imgOpt(a.image, 640)})` : 'linear-gradient(135deg,var(--navy),#1a2a5e)', backgroundSize: 'cover',
+                    // Was 'center' — i.e. center CENTER, 50% — which sliced 48px off
+                    // the top of Patrick's head. Measured with face detection against
+                    // the real headshot in the real 349x280 card. Headshots are
+                    // portraits and this card is landscape, so `cover` fills the WIDTH
+                    // and crops vertically: any downward offset eats the crown first.
+                    // 'top' is the only value that cannot decapitate a portrait, and it
+                    // stays safe for a new agent whose photo is framed differently.
+                    backgroundPosition: 'center top' }} />
                   <div style={{ padding: 22 }}>
                     <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 17, fontWeight: 700, color: 'var(--navy)', marginBottom: 3 }}>{a.name}</div>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 14 }}>{a.role}</div>
