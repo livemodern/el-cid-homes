@@ -13,6 +13,7 @@ import SaveButton from '@/components/SaveButton'
 import InquireButton from '@/components/InquireButton'
 import RequestShowing from '@/components/RequestShowing'
 import BuildingAlerts from '@/components/BuildingAlerts'
+import { BUILDING_NAME, ALERT_FILTER, ALERT_KIND, ALERT_SOURCE } from '@/lib/building'
 
 // ISR: cache + regenerate every 60s. Server-rendered HTML drops TTFB to ~50ms
 // for readers in the window; sync runs hourly so 60s staleness is invisible.
@@ -331,7 +332,7 @@ export default async function ListingPage({ params }: { params: any }) {
           </div>
 
           {/* Quick saved-search widget — scoped to El Cid */}
-          <BuildingAlerts buildingName="El Cid" buildingFilter={{ community_slug: 'el-cid-west-palm-beach' }} kind="home" transaction={isRent ? 'rent' : 'sale'} />
+          <BuildingAlerts buildingName={BUILDING_NAME} buildingFilter={ALERT_FILTER} kind={ALERT_KIND} source={ALERT_SOURCE} transaction={isRent ? 'rent' : 'sale'} />
 
           {!isRent && price > 0 && (
             <div className="calc">

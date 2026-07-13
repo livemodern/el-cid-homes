@@ -8,6 +8,9 @@ const TEAL='#00B2CC',NAVY='#0D173B',SLATE='#64748b';
 const STATUS_COLORS: Record<string,string>={Active:'#22c55e',Pending:'#f59e0b',Closed:'#6b7280'};
 const DISPLAY="'Plus Jakarta Sans',sans-serif",BODY="'Poppins',sans-serif";
 function fmt(n:number|null){return n?'$'+n.toLocaleString():'N/A';}
+import BuildingAlerts from './BuildingAlerts';
+import BuildingAlertsButton from './BuildingAlertsButton';
+import { BUILDING_NAME, ALERT_FILTER, ALERT_KIND, ALERT_SOURCE } from '@/lib/building';
 
 // Listings now arrive server-rendered via props (SSR) — same markup as before,
 // the client just handles filter/sort/mobile interactivity over the SSR set.
@@ -71,7 +74,7 @@ export default function ForSaleGrid({ initialListings, initialError }: { initial
               </button>
             ))}
           </div>
-          <div style={{display:'flex',gap:10}}>
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
             <select value={sort} onChange={e=>setSort(e.target.value)} style={{padding:'8px 12px',borderRadius:8,border:'1px solid #e2e8f0',fontFamily:BODY,fontSize:13,color:NAVY,outline:'none'}}>
               <option value="price_desc">Price: High to Low</option>
               <option value="price_asc">Price: Low to High</option>
@@ -83,9 +86,31 @@ export default function ForSaleGrid({ initialListings, initialError }: { initial
               <option value={2}>2+ Beds</option>
               <option value={3}>3+ Beds</option>
             </select>
+            {/* Always-on alerts trigger. Hidden when the grid is empty — the
+                emptyState card below already carries the same affordance. */}
+            {filtered.length > 0 && (
+              <BuildingAlertsButton
+                buildingName={BUILDING_NAME} buildingFilter={ALERT_FILTER}
+                kind={ALERT_KIND} transaction="sale" source={ALERT_SOURCE}
+              />
+            )}
           </div>
         </div>
         <div style={{marginBottom:16,fontSize:13,color:err?'#dc2626':SLATE,fontFamily:BODY}}>{err?`Unable to load listings, please refresh. (${err})`:`${filtered.length} listing${filtered.length!==1?'s':''} found`}</div>
+        {/* Zero listings used to be a dead end: "0 listings found" over an
+            empty grid. The visitor who searched for a condo here and found none
+            is the most valuable person on the page — give them a real saved
+            search instead of nothing. Same card the main site drops into an
+            empty community grid. */}
+        {!err && filtered.length === 0 && (
+          <div style={{marginBottom:60}}>
+            <BuildingAlerts
+              buildingName={BUILDING_NAME} buildingFilter={ALERT_FILTER}
+              kind={ALERT_KIND} transaction="sale" source={ALERT_SOURCE} emptyState
+            />
+          </div>
+        )}
+
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:24,marginBottom:60}}>
           {filtered.map(l=>(
             <a key={l.mls_id} href={listingHref(l)} onClick={()=>{try{sessionStorage.setItem('mlg_forsale_state',JSON.stringify({sf,sort,minBeds}));}catch{}}}

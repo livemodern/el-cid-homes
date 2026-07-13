@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { listingHref } from '@/lib/listing-slug';
 import { imgOpt, listingImageAlt } from '@/lib/img';
 import CardPhotos from '@/components/CardPhotos';
+import BuildingAlerts from './BuildingAlerts';
+import BuildingAlertsButton from './BuildingAlertsButton';
+import { BUILDING_NAME, ALERT_FILTER, ALERT_KIND, ALERT_SOURCE } from '@/lib/building';
 
 const TEAL    = '#00B2CC';
 const NAVY    = '#0D173B';
@@ -97,7 +100,7 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
               </button>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <select value={sort} onChange={e => setSort(e.target.value)}
               style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: BODY, fontSize: 13, color: NAVY, outline: 'none', cursor: 'pointer' }}>
               <option value="price_desc">Price: High to Low</option>
@@ -111,6 +114,12 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
               <option value={2}>2+ Beds</option>
               <option value={3}>3+ Beds</option>
             </select>
+            {filtered.length > 0 && (
+              <BuildingAlertsButton
+                buildingName={BUILDING_NAME} buildingFilter={ALERT_FILTER}
+                kind={ALERT_KIND} transaction="rent" source={ALERT_SOURCE}
+              />
+            )}
           </div>
         </div>
 
@@ -118,11 +127,14 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
           {err ? 'Unable to load rentals, please refresh.' : `${filtered.length} rental${filtered.length !== 1 ? 's' : ''} found`}
         </div>
 
+                {/* "Check back soon" asked the visitor to do the remembering. The
+            alerts card does it for them. */}
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '80px 24px', color: SLATE }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🏙️</div>
-            <p style={{ fontFamily: DISPLAY, fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>No rentals found</p>
-            <p style={{ fontSize: 14 }}>Check back soon, new rentals are added daily.</p>
+          <div style={{ marginBottom: 60 }}>
+            <BuildingAlerts
+              buildingName={BUILDING_NAME} buildingFilter={ALERT_FILTER}
+              kind={ALERT_KIND} transaction="rent" source={ALERT_SOURCE} emptyState
+            />
           </div>
         )}
 
