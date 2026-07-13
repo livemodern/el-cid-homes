@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import HomeFloorPlans from '@/components/HomeFloorPlans';
 import { listingHref } from '@/lib/listing-slug';
 import { listingImageProps, imgOpt } from '@/lib/img';
 
@@ -9,7 +10,7 @@ import { listingImageProps, imgOpt } from '@/lib/img';
 
 type Cfg = any;
 
-export default function HomeContent({ cfg, avgPrice, forSaleCount, featured }: { cfg: Cfg; avgPrice: string; forSaleCount: number; featured: any[] }) {
+export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gateLimit = 2, gateEnabled = true }: { cfg: Cfg; avgPrice: string; forSaleCount: number; featured: any[]; gateLimit?: number; gateEnabled?: boolean }) {
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
     const fn = () => setScrollY(window.scrollY);
@@ -245,17 +246,14 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured }: {
               <div className="rule-c" style={{ marginBottom: 14 }} />
               <h2 className="h2">{title} Floor Plans</h2>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 16 }}>
-              {floorplans.map((f: any, i: number) => (
-                <div key={i} className="card" style={{ overflow: 'hidden' }}>
-                  {f.image && <img src={imgOpt(f.image, 640)} alt={f.label || 'Floor plan'} style={{ width: '100%', height: 200, objectFit: 'cover' }} />}
-                  <div style={{ padding: 18 }}>
-                    <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>{f.label}</div>
-                    <div style={{ fontSize: 11, color: 'var(--slate)', marginTop: 4 }}>{[f.beds && `${f.beds} bd`, f.baths && `${f.baths} ba`, f.sqft && `${f.sqft} sf`].filter(Boolean).join(' \u00b7 ')}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+
+            <HomeFloorPlans
+              plans={floorplans}
+              title={title}
+              siteSlug="el-cid-homes"
+              gateLimit={gateLimit}
+              gateEnabled={gateEnabled}
+            />
           </div>
         </section>
       )}
@@ -301,7 +299,15 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured }: {
                 {loc.body && <p style={{ fontSize: 14, lineHeight: 1.9, color: 'var(--slate)' }}>{loc.body}</p>}
               </div>
               <div style={{ aspectRatio: '4/5', overflow: 'hidden', background: 'var(--teal-xl)', position: 'relative', borderRadius: 16, boxShadow: '0 14px 44px rgba(13,23,59,.12)' }}>
-                {(loc.image || hero.image) && <img src={imgOpt(loc.image || hero.image, 960)} alt={`${title} location`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                {(loc.image || hero.image) && <img
+                  /* 2048, not 960. This panel is a TALL portrait (546x683), but imgOpt
+                     sizes by WIDTH — so a 960-wide variant of a landscape source yields
+                     only ~440-640px of HEIGHT, and object-fit:cover then has to upscale
+                     it 113-215% to fill 683px (1366px on a retina screen). That is the
+                     blur. 2048 wide gives a 3:2 source ~1365px of height: a straight
+                     downscale, zero upscale, sharp at 2x. Cloudflare serves AVIF so the
+                     byte cost is small. */
+                  src={imgOpt(loc.image || hero.image, 2048)} alt={`${title} location`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                 <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14, background: 'rgba(13,23,59,.92)', padding: '14px 18px', borderRadius: 12 }}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 15, fontWeight: 700, color: '#fff' }}>{title}</div>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 9.5, fontWeight: 600, color: 'var(--teal)', letterSpacing: '.18em', marginTop: 4 }}>HISTORIC DISTRICT &middot; WEST PALM BEACH, FL</div>

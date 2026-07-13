@@ -59,6 +59,8 @@ export default async function HomePage() {
     )}
     <HomeContent
       cfg={cfg}
+      gateLimit={typeof ((cfg as any)?.registration?.afterViews) === 'number' ? (cfg as any).registration.afterViews : 2}
+      gateEnabled={((cfg as any)?.registration?.enabled) !== false}
       avgPrice={computeAvgPrice(listings)}
       forSaleCount={computeForSale(listings)}
       featured={computeFeatured(listings)}
