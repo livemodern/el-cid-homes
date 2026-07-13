@@ -221,6 +221,21 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured }: {
         </div>
       </section>
 
+      {/* VALUATION / CTA BAND */}
+      {vcta.enabled !== false && (vcta.heading || vcta.body) && (
+        <section className="sec" style={{ background: 'var(--navy)' }}>
+          <div className="wrap">
+            <div style={{ maxWidth: 620, margin: '0 auto', textAlign: 'center' }}>
+              <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>Get Started</div>
+              <div style={{ width: 72, height: 2, borderRadius: 2, background: 'var(--teal)', margin: '0 auto 18px' }} />
+              <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(26px,3.4vw,36px)', color: '#fff', marginBottom: 12, fontWeight: 700, letterSpacing: '-.3px' }}>{vcta.heading}</h2>
+              {vcta.body && <p style={{ fontSize: 13, color: 'rgba(255,255,255,.62)', lineHeight: 1.85, marginBottom: 30 }}>{vcta.body}</p>}
+              <a className="btn btn-teal" href={(vcta.cta && vcta.cta.href) || '/contact'} style={{ padding: '15px 34px' }}>{(vcta.cta && vcta.cta.label) || 'Get in Touch'}</a>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* FLOOR PLANS (only if provided in config) */}
       {floorplans.length > 0 && (
         <section className="sec" style={{ background: '#fff' }}>
@@ -245,20 +260,6 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured }: {
         </section>
       )}
 
-      {/* VALUATION / CTA BAND */}
-      {vcta.enabled !== false && (vcta.heading || vcta.body) && (
-        <section className="sec" style={{ background: 'var(--navy)' }}>
-          <div className="wrap">
-            <div style={{ maxWidth: 620, margin: '0 auto', textAlign: 'center' }}>
-              <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>Get Started</div>
-              <div style={{ width: 72, height: 2, borderRadius: 2, background: 'var(--teal)', margin: '0 auto 18px' }} />
-              <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(26px,3.4vw,36px)', color: '#fff', marginBottom: 12, fontWeight: 700, letterSpacing: '-.3px' }}>{vcta.heading}</h2>
-              {vcta.body && <p style={{ fontSize: 13, color: 'rgba(255,255,255,.62)', lineHeight: 1.85, marginBottom: 30 }}>{vcta.body}</p>}
-              <a className="btn btn-teal" href={(vcta.cta && vcta.cta.href) || '/contact'} style={{ padding: '15px 34px' }}>{(vcta.cta && vcta.cta.label) || 'Get in Touch'}</a>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* AMENITIES */}
       {(amen.intro || (Array.isArray(amen.groups) && amen.groups.length > 0)) && (
