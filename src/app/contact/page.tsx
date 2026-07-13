@@ -94,7 +94,7 @@ export default function ContactPage() {
       {/* Hero */}
       <div style={{ position:'relative', height:isMobile?340:420, overflow:'hidden', marginTop:'-72px' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="https://images.mlrecloud.com/site/el-cid-homes/hero.jpg" alt="El Cid at West Palm Beach" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 35%' }} />
+        <img src="https://images.mlrecloud.com/site/el-cid-homes/el-cid-historic-homes-west-palm-beach.jpg" alt="El Cid at West Palm Beach" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 35%' }} />
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(13,23,59,0.45) 0%, rgba(13,23,59,0.2) 40%, rgba(13,23,59,0.7) 100%)' }} />
         <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-end', padding:isMobile?'0 24px 40px':'0 40px 60px', textAlign:'center' }}>
           <div style={{ fontSize:14, color:'#fff', fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', marginBottom:14, fontFamily:DISPLAY }}>

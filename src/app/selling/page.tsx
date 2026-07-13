@@ -12,7 +12,7 @@ const INK      = '#1A1A1A';
 const DISPLAY = "'Plus Jakarta Sans', sans-serif";
 const BODY    = "'Poppins', sans-serif";
 
-const HERO   = 'https://images.mlrecloud.com/site/el-cid-homes/hero.jpg';
+const HERO   = 'https://images.mlrecloud.com/site/el-cid-homes/el-cid-historic-homes-west-palm-beach.jpg';
 const PATRICK = 'https://ezcikavnfchqaenweygw.supabase.co/storage/v1/object/public/agent-photos/a34fe83e-10cd-4a3f-9f4a-a3e58e358069/headshot-1781048024794.jpg';
 
 const fmt = (n: number) => '$' + n.toLocaleString('en-US');

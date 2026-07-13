@@ -13,7 +13,7 @@ export default function HomeValuationPage() {
   return (
     <main style={{ fontFamily: "'Poppins',sans-serif", color: '#323232', background: '#fff' }}>
       <section style={{ position: 'relative', minHeight: 400, overflow: 'hidden', marginTop: '-72px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', textAlign: 'center', padding: '120px 4vw 56px' }}>
-        <img src="https://images.mlrecloud.com/site/el-cid-homes/hero.jpg" alt="El Cid Historic District, West Palm Beach" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 32%' }} />
+        <img src="https://images.mlrecloud.com/site/el-cid-homes/el-cid-historic-homes-west-palm-beach.jpg" alt="El Cid Historic District, West Palm Beach" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 32%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(13,23,59,.55) 0%, rgba(13,23,59,.3) 42%, rgba(13,23,59,.85) 100%)' }} />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto' }}>
         <div style={{ fontFamily: DISPLAY, fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: TEAL, marginBottom: 12 }}>Seller Valuation</div>

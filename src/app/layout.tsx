@@ -35,13 +35,13 @@ export const metadata: Metadata = {
     siteName: 'El Cid Homes',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://images.mlrecloud.com/cdn-cgi/image/width=1200,height=630,fit=cover,quality=82,format=jpeg/site/el-cid-homes/hero.jpg', width: 1200, height: 630, alt: 'El Cid Historic District, West Palm Beach' }],
+    images: [{ url: 'https://images.mlrecloud.com/cdn-cgi/image/width=1200,height=630,fit=cover,quality=82,format=jpeg/site/el-cid-homes/el-cid-historic-homes-west-palm-beach.jpg', width: 1200, height: 630, alt: 'El Cid Historic District, West Palm Beach' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'El Cid Homes | Historic West Palm Beach',
     description: 'Historic homes for sale & rent in El Cid, West Palm Beach, along the Intracoastal across from Palm Beach.',
-    images: ['https://images.mlrecloud.com/cdn-cgi/image/width=1200,height=630,fit=cover,quality=82,format=jpeg/site/el-cid-homes/hero.jpg'],
+    images: ['https://images.mlrecloud.com/cdn-cgi/image/width=1200,height=630,fit=cover,quality=82,format=jpeg/site/el-cid-homes/el-cid-historic-homes-west-palm-beach.jpg'],
   },
   robots: {
     index: INDEXABLE,
