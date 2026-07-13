@@ -16,6 +16,11 @@ function computeAvgPrice(listings: any[]): string {
   return avg >= 1_000_000 ? '$' + (avg / 1_000_000).toFixed(1) + 'M' : '$' + Math.round(avg / 1000) + 'K'
 }
 
+// Active listings on the market right now — drives the __forsale__ stat token.
+function computeForSale(listings: any[]): number {
+  return listings.filter(l => l.status === 'Active').length
+}
+
 function computeFeatured(listings: any[]): any[] {
   const active = listings.filter(l => l.status === 'Active' && (l.image_urls?.length || 0) > 0)
   const sorted = [...active].sort((a: any, b: any) => {
@@ -55,6 +60,7 @@ export default async function HomePage() {
     <HomeContent
       cfg={cfg}
       avgPrice={computeAvgPrice(listings)}
+      forSaleCount={computeForSale(listings)}
       featured={computeFeatured(listings)}
     />
     </>

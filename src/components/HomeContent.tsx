@@ -9,7 +9,7 @@ import { listingImageProps, imgOpt } from '@/lib/img';
 
 type Cfg = any;
 
-export default function HomeContent({ cfg, avgPrice, featured }: { cfg: Cfg; avgPrice: string; featured: any[] }) {
+export default function HomeContent({ cfg, avgPrice, forSaleCount, featured }: { cfg: Cfg; avgPrice: string; forSaleCount: number; featured: any[] }) {
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
     const fn = () => setScrollY(window.scrollY);
@@ -109,13 +109,20 @@ export default function HomeContent({ cfg, avgPrice, featured }: { cfg: Cfg; avg
         </div>
       </section>
 
+      {/* STATS — a stat value may be a literal, or one of two live tokens:
+          __auto__ / __avgprice__  -> the computed average price
+          __forsale__              -> how many residences are on the market RIGHT NOW.
+          The live count is the honest one: on a 69-home building "3" is a
+          scarcity signal, and a stale hardcoded number is just wrong. */}
       {/* STATS */}
       {stats.length > 0 && (
         <div className="statwrap">
           <div className="stats">
             {stats.map((s: any, i: number) => (
               <div key={i}>
-                <div className="n">{s.value === '__auto__' ? avgPrice : s.value}</div>
+                <div className="n">{s.value === '__auto__' || s.value === '__avgprice__' ? avgPrice
+                  : s.value === '__forsale__' ? String(forSaleCount)
+                  : s.value}</div>
                 <div className="l">{s.label}</div>
               </div>
             ))}
@@ -238,6 +245,21 @@ export default function HomeContent({ cfg, avgPrice, featured }: { cfg: Cfg; avg
         </section>
       )}
 
+      {/* VALUATION / CTA BAND */}
+      {vcta.enabled !== false && (vcta.heading || vcta.body) && (
+        <section className="sec" style={{ background: 'var(--navy)' }}>
+          <div className="wrap">
+            <div style={{ maxWidth: 620, margin: '0 auto', textAlign: 'center' }}>
+              <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>Get Started</div>
+              <div style={{ width: 72, height: 2, borderRadius: 2, background: 'var(--teal)', margin: '0 auto 18px' }} />
+              <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(26px,3.4vw,36px)', color: '#fff', marginBottom: 12, fontWeight: 700, letterSpacing: '-.3px' }}>{vcta.heading}</h2>
+              {vcta.body && <p style={{ fontSize: 13, color: 'rgba(255,255,255,.62)', lineHeight: 1.85, marginBottom: 30 }}>{vcta.body}</p>}
+              <a className="btn btn-teal" href={(vcta.cta && vcta.cta.href) || '/contact'} style={{ padding: '15px 34px' }}>{(vcta.cta && vcta.cta.label) || 'Get in Touch'}</a>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* AMENITIES */}
       {(amen.intro || (Array.isArray(amen.groups) && amen.groups.length > 0)) && (
         <section className="sec" style={{ background: 'var(--bg)' }}>
@@ -313,20 +335,6 @@ export default function HomeContent({ cfg, avgPrice, featured }: { cfg: Cfg; avg
         </section>
       )}
 
-      {/* VALUATION / CTA BAND */}
-      {vcta.enabled !== false && (vcta.heading || vcta.body) && (
-        <section className="sec" style={{ background: 'var(--navy)' }}>
-          <div className="wrap">
-            <div style={{ maxWidth: 620, margin: '0 auto', textAlign: 'center' }}>
-              <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>Get Started</div>
-              <div style={{ width: 72, height: 2, borderRadius: 2, background: 'var(--teal)', margin: '0 auto 18px' }} />
-              <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(26px,3.4vw,36px)', color: '#fff', marginBottom: 12, fontWeight: 700, letterSpacing: '-.3px' }}>{vcta.heading}</h2>
-              {vcta.body && <p style={{ fontSize: 13, color: 'rgba(255,255,255,.62)', lineHeight: 1.85, marginBottom: 30 }}>{vcta.body}</p>}
-              <a className="btn btn-teal" href={(vcta.cta && vcta.cta.href) || '/contact'} style={{ padding: '15px 34px' }}>{(vcta.cta && vcta.cta.label) || 'Get in Touch'}</a>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* TEAM */}
       {team.length > 0 && (
