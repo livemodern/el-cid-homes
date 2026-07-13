@@ -214,16 +214,16 @@ export async function POST(req: NextRequest) {
           try {
             const sb2 = getSupabase();
             if (userType) {
-              await sb2.from('contacts').update({ client_type: String(userType).trim() }).eq('id', ourContact.id);
+              await sb2.from('contacts').update({ client_type: String(userType).trim() }).eq('id', contactId);
             }
             const { data: regNow } = await sb2.from('registrations')
               .select('user_id').ilike('email', email).maybeSingle();
             if (regNow?.user_id) {
-              await sb2.from('site_events').update({ contact_id: ourContact.id }).eq('user_id', regNow.user_id).is('contact_id', null);
+              await sb2.from('site_events').update({ contact_id: contactId }).eq('user_id', regNow.user_id).is('contact_id', null);
               const { data: ses } = await sb2.from('site_events').select('session_id').eq('user_id', regNow.user_id).not('session_id', 'is', null).limit(50);
               const sids = Array.from(new Set((ses ?? []).map((r: any) => r.session_id).filter(Boolean)));
               if (sids.length > 0) {
-                await sb2.from('site_events').update({ contact_id: ourContact.id }).in('session_id', sids).is('contact_id', null);
+                await sb2.from('site_events').update({ contact_id: contactId }).in('session_id', sids).is('contact_id', null);
               }
             }
           } catch (e) {
