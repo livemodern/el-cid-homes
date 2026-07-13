@@ -40,6 +40,15 @@ export interface RouteLeadResult {
   matched_rule_id: string | null
   team_id: string | null
   decision_id: string | null
+  /**
+   * OUR contact id. mlg-admin now CREATES the contact (or soft-merges an existing one)
+   * when it routes the lead, rather than waiting for Follow Up Boss to mint the person
+   * and mirror it back a second or two later.
+   *
+   * The end of FUB as our identity provider. Hang native work off THIS — never off a
+   * FUB personId.
+   */
+  contact_id?: string | null
 }
 
 // Returns null on any failure — never throws. Routing is a record-keeping

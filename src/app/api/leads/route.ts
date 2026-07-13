@@ -113,6 +113,14 @@ export async function POST(req: NextRequest) {
           },
         });
 
+        // OUR contact id. mlg-admin's /api/leads/route now CREATES the contact (or
+        // soft-merges an existing one) when it routes the lead, and hands back its id.
+        // Follow Up Boss is no longer the identity provider — it's a downstream mirror.
+        //
+        // The native work below used to be gated behind the FUB person id, and resolved
+        // our OWN contact by looking it up through FUB. If FUB was slow, rate-limited,
+        // or gone, none of it happened — silently.
+        const contactId = routing?.contact_id ?? null;
         let personId: number | undefined;
         if (isRegistration) {
           // New user signed up
@@ -202,17 +210,15 @@ export async function POST(req: NextRequest) {
         // site_events.contact_id (post-reg + pre-reg adoption via session_id).
         // Mirrors mlg-site's /api/leads bridge (commit e1b22e6). Patrick
         // 2026-06-25: don't trust FUB to round-trip customFields.
-        if (isRegistration && personId && email) {
+        if (isRegistration && contactId && email) {
           try {
             const sb2 = getSupabase();
-            const { data: ourContact } = await sb2.from('contacts')
-              .select('id').eq('fub_id', personId).maybeSingle();
-            if (ourContact?.id && userType) {
+            if (userType) {
               await sb2.from('contacts').update({ client_type: String(userType).trim() }).eq('id', ourContact.id);
             }
             const { data: regNow } = await sb2.from('registrations')
               .select('user_id').ilike('email', email).maybeSingle();
-            if (ourContact?.id && regNow?.user_id) {
+            if (regNow?.user_id) {
               await sb2.from('site_events').update({ contact_id: ourContact.id }).eq('user_id', regNow.user_id).is('contact_id', null);
               const { data: ses } = await sb2.from('site_events').select('session_id').eq('user_id', regNow.user_id).not('session_id', 'is', null).limit(50);
               const sids = Array.from(new Set((ses ?? []).map((r: any) => r.session_id).filter(Boolean)));
