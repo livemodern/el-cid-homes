@@ -390,7 +390,7 @@ export default function SellingPage() {
           <div style={{ background: '#fff', borderRadius: 16, padding: 20, display: 'flex', gap: 16, alignItems: 'center', minWidth: isMobile ? 0 : 320, boxShadow: '0 14px 44px rgba(0,0,0,0.28)' }}>
             <div style={{ width: 64, height: 64, borderRadius: 99, overflow: 'hidden', flexShrink: 0, background: '#eef2f7' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={PATRICK} alt="Patrick Lafferty" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+              <img src={PATRICK} alt="Patrick Lafferty, El Cid specialist at Modern Living Group" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 10, color: TEAL, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: DISPLAY, marginBottom: 4 }}>El Cid Specialist</div>

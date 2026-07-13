@@ -18,6 +18,8 @@
  * at the Vercel edge for a year.
  */
 
+import { BUILDING_NAME } from '@/lib/building';
+
 export const CF_IMAGES_HOST = 'images.mlrecloud.com';
 
 // MLS photo CDNs that require our server-side auth proxy. SHARED with
@@ -126,12 +128,36 @@ export function listingImageAlt(listing: ListingForAlt, idx: number = 0): string
     street = street.slice(0, i).trim().replace(/,$/, '');
   }
 
-  const unit = listing.unit_number ? `Unit ${listing.unit_number}` : '';
-  const where = [street, unit].filter(Boolean).join(' ');
-  const place = [where, city].filter(Boolean).join(', ');
+  // ...and it ALSO already ends in the unit number. "480 Hibiscus Street 221",
+  // sometimes "480 Hibiscus Street Unit 229". Appending our own "Unit 221" on
+  // top of that shipped alt text reading
+  //     "480 Hibiscus Street 221 Unit 221, West Palm Beach, exterior"
+  // and, in the "Unit 229" case,
+  //     "480 Hibiscus Street Unit 229 Unit Unit 229, West Palm Beach, exterior"
+  // on every listing card on the live site. Strip any trailing unit token first.
+  // unit_number itself is dirty too — some rows store it as "Unit 229", not
+  // "229", so a naive `Unit ${unit}` yields "Unit Unit 229". Normalise first.
+  const unitRaw = String(listing.unit_number || '')
+    .trim()
+    .replace(/^(?:#|unit\s*)/i, '')
+    .trim();
+  if (unitRaw) {
+    const esc = unitRaw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    street = street
+      .replace(new RegExp(`[\\s,]*(?:#|unit\\s*)?${esc}$`, 'i'), '')
+      .trim()
+      .replace(/,$/, '');
+  }
+
+  const unit = unitRaw ? `Unit ${unitRaw}` : '';
   const label = idx < ROOM_LABELS.length ? ROOM_LABELS[idx] : `view ${idx + 1}`;
 
-  return place ? `${place}, ${label}` : `Property photo ${idx + 1}`;
+  // Lead with the building. It's what the page is about, it's the term people
+  // search in image search, and it was missing entirely before.
+  const head = [BUILDING_NAME, unit].filter(Boolean).join(' ');
+  const place = [head, street, city].filter(Boolean).join(', ');
+
+  return place ? `${place}, ${label}` : `${BUILDING_NAME} photo ${idx + 1}`;
 }
 
 // ── Spread-ready <img> props for a listing photo ─────────────────────────
