@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/check-contacts.mjs && next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate-images": "node scripts/migrate-images-to-r2.mjs"
+    "migrate-images": "node scripts/migrate-images-to-r2.mjs",
+    "check:contacts": "node scripts/check-contacts.mjs"
   },
   "dependencies": {
     "next": "^14.2.0",
