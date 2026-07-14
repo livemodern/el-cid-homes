@@ -21,19 +21,25 @@ const STORAGE_KEY = 'mlg.viewed_floorplans';
 // The two surfaces name the same plan differently, and if we stored those names
 // raw the "shared" gate would quietly stop being shared.
 //
-//   homepage      keys off config `label`        -> "A"
-//   /floorplans   maps it to `Unit ${p.label}`   -> "Unit A"
+//   homepage      keys off the config `label`     -> "A"
+//   /floorplans   applies a per-site transform:
+//                   one-city-plaza  `Unit ${label}`  -> "Unit A"
+//                   south-tower     `Plan ${label}`  -> "Plan A"
+//                   the rest         label            -> "A"
 //
-// Left alone, opening plan A on the homepage and again on /floorplans records
-// TWO entries for ONE plan — so the visitor burns two slots for a single plan.
-// It fails toward gating too early rather than too late, which is why it would
-// never have shown up as a bug report; it would just quietly annoy people.
+// Left alone, opening plan A on the homepage and again on /floorplans records TWO
+// entries for ONE plan, and the visitor burns two gate slots on a single plan. It
+// fails toward gating too EARLY rather than too late — which is precisely why it
+// would never surface as a bug report. It doesn't leak access, it just quietly
+// nags people who haven't actually seen two plans.
 //
-// Normalising here (rather than at either call site) means the two pages cannot
-// drift apart again, and a new site with its own naming transform still lands on
-// the same key.
+// The prefix list is deliberately open-ended: each site invented its own wording,
+// so the next one will too. Normalising here rather than at either call site means
+// the pages cannot drift apart again.
+const PLAN_PREFIX = /^(unit|plan|residence|floor\s*plan)\s+/i;
+
 function planKey(name: string): string {
-  return String(name).trim().replace(/^unit\s+/i, '').toLowerCase();
+  return String(name).trim().replace(PLAN_PREFIX, '').replace(/\s+/g, ' ').toLowerCase();
 }
 
 export function readPlansViewed(): string[] {
