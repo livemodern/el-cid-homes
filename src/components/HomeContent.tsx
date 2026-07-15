@@ -83,6 +83,10 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
           .a3{grid-template-columns:1fr !important}
           .l3{grid-template-columns:1fr !important}
           .tm2{grid-template-columns:1fr !important}
+          .faband{grid-template-columns:1fr !important}
+          .faimg{height:360px !important;min-height:0 !important;border-radius:22px 22px 0 0 !important}
+          .facontent{padding:32px 26px !important}
+          .facta{width:100% !important;justify-content:center !important}
         }
       `}</style>
 
@@ -352,29 +356,44 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
             <div style={{ textAlign: 'center', marginBottom: 44 }}>
               <div className="eyebrow">Your Team</div>
               <div className="rule-c" style={{ marginBottom: 14 }} />
-              <h2 className="h2">{title} Specialists</h2>
+              <h2 className="h2">{title} Specialist{team.length > 1 ? 's' : ''}</h2>
             </div>
-            <div className="tm2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 22, maxWidth: 720, margin: '0 auto' }}>
-              {team.map((a: any, i: number) => (
-                <div key={i} className="card" style={{ overflow: 'hidden' }}>
-                  <div style={{ height: 280, background: a.image ? `url(${imgOpt(a.image, 640)})` : 'linear-gradient(135deg,var(--navy),#1a2a5e)', backgroundSize: 'cover',
-                    // Was 'center' — i.e. center CENTER, 50% — which sliced 48px off
-                    // the top of Patrick's head. Measured with face detection against
-                    // the real headshot in the real 349x280 card. Headshots are
-                    // portraits and this card is landscape, so `cover` fills the WIDTH
-                    // and crops vertically: any downward offset eats the crown first.
-                    // 'top' is the only value that cannot decapitate a portrait, and it
-                    // stays safe for a new agent whose photo is framed differently.
-                    backgroundPosition: 'center top' }} />
-                  <div style={{ padding: 22 }}>
-                    <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 17, fontWeight: 700, color: 'var(--navy)', marginBottom: 3 }}>{a.name}</div>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 14 }}>{a.role}</div>
-                    {a.email && <a href={`mailto:${a.email}`} style={{ display: 'block', fontSize: 12, color: 'var(--slate)', textDecoration: 'none', marginBottom: 5 }}>{a.email}</a>}
-                    {a.phone && <a href={`tel:${a.phone}`} style={{ display: 'block', fontSize: 12, color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>{a.phone}</a>}
+
+            {team.length === 1 ? (
+              /* ── Single specialist — editorial featured band. A lone card in the
+                 2-up grid floated awkwardly; this fills the width and gives the
+                 building's one agent real presence: portrait, bio, and direct
+                 call/email CTAs. Fully config-driven off team[0]. ── */
+              <div className="faband" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 430px) 1fr', maxWidth: 1040, margin: '0 auto', background: '#fff', border: '1px solid var(--border)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 18px 50px rgba(13,23,59,0.10)' }}>
+                <div className="faimg" style={{ minHeight: 480, background: team[0].image ? `url(${imgOpt(team[0].image, 828)})` : 'linear-gradient(135deg,var(--navy),#1a2a5e)', backgroundSize: 'cover', backgroundPosition: 'center top' }} />
+                <div className="facontent" style={{ padding: '48px 46px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>{team[0].role}</div>
+                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 32, fontWeight: 800, color: 'var(--navy)', lineHeight: 1.1, marginBottom: 18 }}>{team[0].name}</div>
+                  <div style={{ width: 54, height: 3, background: 'var(--teal)', borderRadius: 3, marginBottom: 22 }} />
+                  {team[0].bio && <p style={{ fontSize: 15, color: '#3f4a5c', lineHeight: 1.78, margin: '0 0 30px', fontFamily: "'Poppins',sans-serif", maxWidth: 540 }}>{team[0].bio}</p>}
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    {team[0].phone && <a className="facta" href={`tel:${team[0].phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: 'var(--teal)', color: '#fff', textDecoration: 'none', borderRadius: 99, fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 800, letterSpacing: '.03em' }}>Call {team[0].phone}</a>}
+                    {team[0].email && <a className="facta" href={`mailto:${team[0].email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: 'transparent', color: 'var(--navy)', textDecoration: 'none', borderRadius: 99, border: '1.5px solid var(--navy)', fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 700 }}>Email {String(team[0].name).split(' ')[0]}</a>}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              /* ── 2+ specialists — the original portrait-card grid. ── */
+              <div className="tm2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 22, maxWidth: 720, margin: '0 auto' }}>
+                {team.map((a: any, i: number) => (
+                  <div key={i} className="card" style={{ overflow: 'hidden' }}>
+                    <div style={{ height: 280, background: a.image ? `url(${imgOpt(a.image, 640)})` : 'linear-gradient(135deg,var(--navy),#1a2a5e)', backgroundSize: 'cover',
+                      backgroundPosition: 'center top' }} />
+                    <div style={{ padding: 22 }}>
+                      <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 17, fontWeight: 700, color: 'var(--navy)', marginBottom: 3 }}>{a.name}</div>
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 14 }}>{a.role}</div>
+                      {a.email && <a href={`mailto:${a.email}`} style={{ display: 'block', fontSize: 12, color: 'var(--slate)', textDecoration: 'none', marginBottom: 5 }}>{a.email}</a>}
+                      {a.phone && <a href={`tel:${a.phone}`} style={{ display: 'block', fontSize: 12, color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>{a.phone}</a>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
