@@ -5,7 +5,6 @@ import { getSiteConfig } from '@/lib/site-config';
 import Footer from '@/components/Footer';
 // FubPixel removed 2026-07-08 — matches mlg-site 5d849cf + TCP b15977f4.
 // FUB downstream; server-side push from mlg-site 074fd0b handles view sync.
-// import FubPixel from '@/components/FubPixel';
 import { AuthBackGuard } from '@/components/AuthBackGuard';
 
 // Single source of truth for the public domain + index gate. At cutover set

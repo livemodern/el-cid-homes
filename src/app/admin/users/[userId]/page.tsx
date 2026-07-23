@@ -169,7 +169,6 @@ export default function AdminUserDetail() {
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                     <SiteBadge slug={profile?.source_site} />
                     <span style={{ fontSize: 12, color: SLATE }}>Joined {profile?.created_at ? fmtDate(profile.created_at) : '—'}</span>
-                    {profile?.fub_synced && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: '#dcfce7', color: '#166534' }}>FUB SYNCED</span>}
                   </div>
                 </div>
                 {/* Quick stats */}

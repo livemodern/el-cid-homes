@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { submitRegistration, submitPropertyInquiry, submitGeneralInquiry, isBot, updatePerson, findPersonByEmail, postNote } from '@/lib/fub';
+import { isBot } from '@/lib/lead-utils';
 import { recordLeadRouting } from '@/lib/route-lead-client';
 
 // Lazy init — module-scope createClient crashes builds in environments
@@ -79,9 +79,8 @@ export async function POST(req: NextRequest) {
     await (async () => {
       try {
         // 2a. Route — mlg-admin owns the rule engine. Records the decision
-        // in lead_routing_decisions and returns the chosen agent so we can
-        // stamp them as the FUB person's owner below (overriding FUB's
-        // own lead-flow group assignment). Patrick 2026-06-25.
+        // in lead_routing_decisions, creates/merges the native contact,
+        // fires the agent alerts, and writes the wall activity.
         // Source is 'el-cid-homes'; community_slug 'el-cid-west-palm-beach'
         // carries the neighborhood context so community/geo rules resolve. The
         // featured-agent pin is DISPLAY ONLY — it does not route leads. El Cid
@@ -121,90 +120,10 @@ export async function POST(req: NextRequest) {
         // our OWN contact by looking it up through FUB. If FUB was slow, rate-limited,
         // or gone, none of it happened — silently.
         const contactId = routing?.contact_id ?? null;
-        let personId: number | undefined;
-        if (isRegistration) {
-          // New user signed up
-          const reg = await submitRegistration({ contact, siteSlug, stage: 'Lead', tags: userTypeTag.length ? userTypeTag : undefined });
-          personId = (reg as any)?.personId;
-
-        } else if (mls_id || listing) {
-          // Showing request or property-specific inquiry
-          const inq = await submitPropertyInquiry({
-            contact,
-            property: {
-              mlsId:         mls_id,
-              streetAddress: listing,
-              listPrice,
-              // Additional property fields will be enriched by the viewed route
-            },
-            siteSlug,
-            message,
-            showingDate,
-            showingTime,
-            showingType,
-          });
-          personId = (inq as any)?.personId;
-
-        } else {
-          // Generic contact form
-          const gen = await submitGeneralInquiry({ contact, siteSlug, message });
-          personId = (gen as any)?.personId;
-        }
-
-        // FUB's POST /events response doesn't reliably surface person.id; since
-        // FUB dedupes by email the person exists right after the create, so
-        // resolve the id by email when the event response didn't give us one —
-        // otherwise assignment + writeback below silently no-op. Ported from
-        // mlg-site /api/leads (commit see fub-events.ts caller). 2026-06-25.
-        if (!personId && email) {
-          personId = (await findPersonByEmail(email)) ?? undefined;
-        }
-
-        // 2b. Router stamp — override FUB's lead-flow assignment with the
-        // agent our routing engine picked. Guard: don't reassign a contact
-        // that already has an owner (existing client should keep their
-        // current agent). Mirrors mlg-site's owner-guard pattern.
-        if (personId && routing?.agent_id) {
-          let alreadyOwned = false;
-          if (email) {
-            try {
-              const sbCheck = getSupabase();
-              const { data: existing } = await sbCheck.from('contacts')
-                .select('id, assigned_to_id, archived_at')
-                .ilike('email', email).limit(5);
-              alreadyOwned = !!(existing || []).find((c: any) => !c.archived_at && c.assigned_to_id != null);
-            } catch (e) {
-              console.warn('owner-guard lookup failed (non-fatal):', e);
-            }
-          }
-          if (!alreadyOwned) {
-            const sbAg = getSupabase();
-            const { data: ag } = await sbAg.from('agents').select('fub_id, name').eq('id', routing.agent_id).maybeSingle();
-            if (ag?.fub_id != null) {
-              await updatePerson(personId, { assignedUserId: ag.fub_id });
-
-              // FUB @-mention note CUT (Patrick 2026-07-11): fully redundant — the
-              // central routing engine (notifyAgentOfNewLead) already fires native
-              // agent alerts on every lead: Resend email (office CC), CRM bell, and
-              // Telnyx SMS (LEAD_NOTIFY_SMS live, SMS_PROVIDER=telnyx — runtime-
-              // verified). The FUB owner PUT above stays: that's downstream
-              // assignment sync, not a notification.
-            }
-          }
-        }
-
-        // 2c. Write FUB id back to the leads row so we can audit which TCP
-        // leads actually landed in FUB and on whose desk. Mirrors mlg-site's
-        // 2e writeback step.
-        if (personId && lead?.id) {
-          try {
-            await getSupabase().from('leads')
-              .update({ fub_id: personId, fub_synced_at: new Date().toISOString() })
-              .eq('id', lead.id);
-          } catch (e) {
-            console.warn('TCP fub_id writeback failed (non-fatal):', e);
-          }
-        }
+        // (FUB person creation, owner PUT, and fub_id writeback DELETED —
+        // Patrick 2026-07-23. mlg-admin's routing endpoint above owns
+        // identity, assignment, native agent alerts, AND the wall's
+        // lead_event activity record.)
 
         // Native CRM bridge — write contacts.client_type + stamp
         // site_events.contact_id (post-reg + pre-reg adoption via session_id).

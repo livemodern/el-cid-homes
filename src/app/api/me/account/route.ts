@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { validatePhoneFormat, lookupPhone, isVoip } from '@/lib/phone'
-import { submitRegistration, findPersonByEmail, postNote } from '@/lib/fub'
 
 // Inline equivalent of mlg-site's @/lib/agents agentSlug — TCP doesn't carry
 // the full agents helper, but this single utility is all this route uses.
@@ -145,7 +144,7 @@ async function appendContactEmail(sb: any, contactId: string, email: string) {
   } catch { /* best-effort */ }
 }
 
-// Post a note both to the native CRM timeline and to FUB. Best-effort.
+// Post a note to the native CRM timeline. Best-effort.
 async function timelineNote(sb: any, email: string | null, msg: string) {
   if (!email) return
   const contactId = await resolveContactId(sb, email)
@@ -155,9 +154,8 @@ async function timelineNote(sb: any, email: string | null, msg: string) {
         contact_id: contactId, type: 'note', body: msg,
         created_by: 'system:account', activity_at: new Date().toISOString(),
       })
-    } catch { /* non-fatal — FUB note is the durable copy */ }
+    } catch { /* non-fatal */ }
   }
-  findPersonByEmail(email).then((pid: number | null) => { if (pid) postNote(pid, msg) }).catch(() => {})
 }
 
 export async function GET(req: NextRequest) {
@@ -248,13 +246,6 @@ export async function POST(req: NextRequest) {
       })
     } catch { /* non-fatal */ }
 
-    if (user.email && reg.phone) {
-      submitRegistration({
-        contact: { firstName, lastName: lastName || undefined, email: user.email, phone: reg.phone },
-        siteSlug: 'mlg-site',
-        tags: ['profile-updated'],
-      }).catch(() => {})
-    }
     return NextResponse.json({ ok: true })
   }
 
