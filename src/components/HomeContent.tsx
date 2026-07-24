@@ -47,7 +47,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
         .wrap{max-width:1240px;margin:0 auto;padding:0 40px}
         .eyebrow{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal-ink);margin-bottom:10px}
         .h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(28px,3.2vw,38px);font-weight:700;line-height:1.18;letter-spacing:-.3px;color:var(--navy)}
-        .h2 em{font-style:italic;font-weight:500;color:var(--teal)}
+        .h2 em{font-style:italic;font-weight:500;color:#0095ab}
         .rule{width:72px;height:2px;background:var(--teal);border-radius:2px}
         .rule-c{width:72px;height:2px;background:var(--teal);border-radius:2px;margin:0 auto}
         .btn{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;letter-spacing:.02em;border:none;border-radius:99px;padding:13px 28px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,background .15s ease,color .15s ease;text-decoration:none;display:inline-block}
@@ -383,12 +383,12 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
               <div className="faband" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 430px) 1fr', maxWidth: 1040, margin: '0 auto', background: '#fff', border: '1px solid var(--border)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 18px 50px rgba(13,23,59,0.10)' }}>
                 <div className="faimg" style={{ minHeight: 480, background: team[0].image ? `url(${imgOpt(team[0].image, 828)})` : 'linear-gradient(135deg,var(--navy),#1a2a5e)', backgroundSize: 'cover', backgroundPosition: 'center top' }} />
                 <div className="facontent" style={{ padding: '48px 46px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>{team[0].role}</div>
+                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--teal-ink)', marginBottom: 10 }}>{team[0].role}</div>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 32, fontWeight: 800, color: 'var(--navy)', lineHeight: 1.1, marginBottom: 18 }}>{team[0].name}</div>
                   <div style={{ width: 54, height: 3, background: 'var(--teal)', borderRadius: 3, marginBottom: 22 }} />
                   {team[0].bio && <p style={{ fontSize: 15, color: '#3f4a5c', lineHeight: 1.78, margin: '0 0 30px', fontFamily: "'Poppins',sans-serif", maxWidth: 540 }}>{team[0].bio}</p>}
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    {team[0].phone && <a className="facta" href={`tel:${team[0].phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: 'var(--teal)', color: '#fff', textDecoration: 'none', borderRadius: 99, fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 800, letterSpacing: '.03em' }}>Call {team[0].phone}</a>}
+                    {team[0].phone && <a className="facta" href={`tel:${team[0].phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: 'var(--teal-ink)', color: '#fff', textDecoration: 'none', borderRadius: 99, fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 800, letterSpacing: '.03em' }}>Call {team[0].phone}</a>}
                     {team[0].email && <a className="facta" href={`mailto:${team[0].email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: 'transparent', color: 'var(--navy)', textDecoration: 'none', borderRadius: 99, border: '1.5px solid var(--navy)', fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 700 }}>Email {String(team[0].name).split(' ')[0]}</a>}
                   </div>
                 </div>
