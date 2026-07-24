@@ -239,7 +239,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
 
       {/* VALUATION / CTA BAND */}
       {vcta.enabled !== false && (vcta.heading || vcta.body) && (
-        <section className="sec" style={{ background: 'var(--navy)' }}>
+        <section className="sec sec-dark" style={{ background: 'var(--navy)' }}>
           <div className="wrap">
             <div style={{ maxWidth: 620, margin: '0 auto', textAlign: 'center' }}>
               <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>Get Started</div>

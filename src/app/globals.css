@@ -171,6 +171,10 @@ input::placeholder, textarea::placeholder { color: var(--slate); font-size: 12px
 /* Eyebrows on navy sections keep the BRIGHT brand teal — 6.6:1 on navy —
    because --teal-ink (tuned for white backgrounds) is only ~2:1 there.
    Matches the inline background styles the sections use. */
+/* .sec-dark class is REQUIRED on navy sections: after hydration the browser
+   rewrites inline styles to rgb(13, 23, 59), so [style*="--navy"] attribute
+   matching silently stops working. The attr selectors stay as a pre-hydration
+   fallback. */
+section.sec-dark .eyebrow,
 section[style*="--navy"] .eyebrow,
-section[style*="0D173B"] .eyebrow,
-section[style*="0d173b"] .eyebrow { color: var(--teal); }
+section[style*="0D173B"] .eyebrow { color: var(--teal); }
