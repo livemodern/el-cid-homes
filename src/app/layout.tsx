@@ -1,4 +1,5 @@
 import './globals.css';
+import './fonts.css';
 import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import { getSiteConfig } from '@/lib/site-config';
@@ -93,8 +94,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Fonts are self-hosted (src/app/fonts.css + /public/fonts) under the
+            original family names, so every literal 'Plus Jakarta Sans'/'Poppins'
+            reference keeps working. Replaces the render-blocking Google Fonts
+            stylesheet (~750ms on mobile per PSI, 2026-07-23). Preload the two
+            above-the-fold faces: Jakarta variable (headings) + Poppins 300 (body). */}
+        <link rel="preload" href="/fonts/plus-jakarta-sans-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/poppins-300.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         {/* Favicons are declared via Next.js file convention at src/app/icon.png +
             src/app/apple-icon.png (the ML submark) — no manual link tags needed. */}
         {/* MLG native pixel — first-party event tracking to mlg-admin's
@@ -102,10 +108,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             resolves per-contact + attributes traffic to El Cid.
             Cross-origin POST to modernlivingre.com/api/track (CORS allowlisted). */}
         <script async src="https://modernlivingre.com/pixel.js" data-site-slug="el-cid-homes" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500;1,700&family=Poppins:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(agentJsonLd) }} />
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
