@@ -1,5 +1,6 @@
 import { getGridListings } from '@/lib/listings'
 import { getSiteConfig } from '@/lib/site-config'
+import { imgSrcSet, HERO_WIDTHS, HERO_SIZES } from '@/lib/img'
 import HomeContent from '@/components/HomeContent'
 
 // SSR the config-driven content (featured units + avg price + CMS config) so
@@ -52,8 +53,23 @@ export default async function HomePage() {
       acceptedAnswer: { '@type': 'Answer', text: stripHtml(f.a) },
     })),
   } : null
+  // Server-rendered responsive hero preload: HomeContent is a client
+  // component, so without this the browser can't discover the hero until the
+  // whole JS bundle downloads + hydrates — the dominant LCP cost on mobile.
+  // Same imgSrcSet(HERO_WIDTHS)/HERO_SIZES as the <img> in HomeContent.
+  const heroSrc: string | undefined = ((site as any)?.config?.hero?.image as string | undefined) || undefined
+
   return (
     <>
+    {heroSrc && (
+      <link
+        rel="preload"
+        as="image"
+        imageSrcSet={imgSrcSet(heroSrc, HERO_WIDTHS)}
+        imageSizes={HERO_SIZES}
+        fetchPriority="high"
+      />
+    )}
     {faqLd && (
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
     )}

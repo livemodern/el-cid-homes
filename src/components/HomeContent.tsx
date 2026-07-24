@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import HomeFloorPlans from '@/components/HomeFloorPlans';
 import { listingHref } from '@/lib/listing-slug';
-import { listingImageProps, imgOpt } from '@/lib/img';
+import { listingImageProps, imgOpt, imgSrcSet, HERO_WIDTHS, HERO_SIZES } from '@/lib/img';
 
 //  LiveModern brand: Teal #00B2CC · Navy #0D173B · Ink #1A1A1A
 //  Content is CMS-driven (sites.config, authored in mlg-admin → Mini-Sites).
@@ -32,7 +32,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
   const stats = Array.isArray(c.stats) ? c.stats : [];
   const ctas = Array.isArray(hero.ctas) ? hero.ctas : [];
 
-  const heroImg = hero.image ? imgOpt(hero.image, 1920) : '';
+  const heroImg = hero.image ? imgOpt(hero.image, 1280) : '';
   const title: string = hero.title || 'El Cid';
   const tw = title.split(' ');
   const tLast = tw.length > 1 ? tw.pop() : '';
@@ -93,7 +93,18 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
       {/* HERO */}
       <section style={{ height: '72vh', position: 'relative', display: 'flex', alignItems: 'flex-end', paddingBottom: 110, overflow: 'hidden', background: 'var(--navy)' }}>
         {heroImg && (
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${heroImg})`, backgroundSize: 'cover', backgroundPosition: 'center 40%', transform: `scale(1.04) translateY(${scrollY * .11}px)`, transition: 'transform .1s linear' }} />
+          /* Real <img> (not a CSS background) so the browser can pick a
+             viewport-sized srcset candidate and match the server preload in
+             app/page.tsx (same HERO_WIDTHS/HERO_SIZES — keep them in sync). */
+          <img
+            src={heroImg}
+            srcSet={imgSrcSet(hero.image, HERO_WIDTHS)}
+            sizes={HERO_SIZES}
+            alt={title}
+            fetchPriority="high"
+            decoding="async"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', transform: `scale(1.04) translateY(${scrollY * .11}px)`, transition: 'transform .1s linear' }}
+          />
         )}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(13,23,59,0) 0%,rgba(13,23,59,0) 30%,rgba(13,23,59,0.32) 60%,rgba(13,23,59,0.58) 100%)' }} />
         <div className="wrap" style={{ position: 'relative', textAlign: 'center' }}>
@@ -313,7 +324,12 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
                      sources 18% short, because Cloudflare never upscales past the
                      original — the height you get is width/aspect, capped at source.) Cloudflare serves AVIF so the
                      byte cost is small. */
-                  src={imgOpt(loc.image || hero.image, 2560)} alt={`${title} location`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  src={imgOpt(loc.image || hero.image, 2560)}
+                  srcSet={imgSrcSet(loc.image || hero.image, [768, 1080, 1440, 2048, 2560])}
+                  sizes="(max-width: 900px) 100vw, 546px"
+                  loading="lazy"
+                  decoding="async"
+                  alt={`${title} location`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                 <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14, background: 'rgba(13,23,59,.92)', padding: '14px 18px', borderRadius: 12 }}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 15, fontWeight: 700, color: '#fff' }}>{title}</div>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 9.5, fontWeight: 600, color: 'var(--teal)', letterSpacing: '.18em', marginTop: 4 }}>HISTORIC DISTRICT &middot; WEST PALM BEACH, FL</div>

@@ -22,6 +22,14 @@ import { BUILDING_NAME } from '@/lib/building';
 
 export const CF_IMAGES_HOST = 'images.mlrecloud.com';
 
+// Hero <img> and its server-rendered preload (app/page.tsx) MUST share these
+// widths + sizes so the browser resolves the SAME srcset candidate for both.
+// A mismatch means the hero downloads twice — the exact bug this replaced
+// (flat width=1920 CSS background discovered only after hydration, plus a
+// second 2560 fetch: ~774KB of hero on a phone that needs ~120KB).
+export const HERO_WIDTHS = [768, 1080, 1440, 1920, 2560];
+export const HERO_SIZES = '100vw';
+
 // MLS photo CDNs that require our server-side auth proxy. SHARED with
 // app/api/proxy/image/route.ts — the proxy must accept exactly this set
 // and nothing else (it attaches our Trestle bearer token to the fetch,
