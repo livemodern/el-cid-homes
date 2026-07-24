@@ -191,7 +191,7 @@ export default function RecentSalesGrid({ initialListings, initialError }: { ini
                           Listed {fmt(l.list_price)}
                         </span>
                         {diff !== null && (
-                          <span style={{ fontSize: 11, fontWeight: 700, color: diff >= 0 ? '#22c55e' : '#ef4444', fontFamily: DISPLAY }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: diff >= 0 ? '#15803d' : '#ef4444', fontFamily: DISPLAY }}>
                             {diff >= 0 ? '+' : ''}{diff.toFixed(1)}%
                           </span>
                         )}

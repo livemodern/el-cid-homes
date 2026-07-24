@@ -24,7 +24,14 @@ html { scroll-behavior: smooth; }
   --ink:     #1A1A1A;
   --black1:  #1A1A1A;
   --black2:  #323232;
-  --mut:     #7a7f8c;
+  /* WCAG AA: #7a7f8c was 4.01:1 on white — just under the 4.5:1 floor for
+     small text. #6b7080 is 4.94:1 and visually indistinguishable at 10.5px. */
+  --mut:     #6b7080;
+  /* Small-TEXT teal. Brand teal #00b2cc is 2.55:1 on white — fine for
+     buttons/graphics/large headings, fails WCAG for 9-12px text. Use
+     --teal-ink (4.71:1 on #fff, 4.50:1 on #f8fafc) for eyebrows, card meta,
+     role labels, tel links. Never lighten this below #007f93. */
+  --teal-ink: #007f93;
   --slate:   #64748b;
   --line:    #e8eaee;
   --border:  #e2e8f0;
@@ -44,7 +51,7 @@ h1, h2, h3, .jk { font-family: 'Plus Jakarta Sans', sans-serif; }
 .eyebrow {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 11px; font-weight: 700; letter-spacing: 3px;
-  text-transform: uppercase; color: var(--teal); margin-bottom: 10px;
+  text-transform: uppercase; color: var(--teal-ink); margin-bottom: 10px;
 }
 .h2 {
   font-family: 'Plus Jakarta Sans', sans-serif;

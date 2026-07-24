@@ -45,7 +45,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
         :root{--teal:#00B2CC;--teal-d:#0095AD;--teal-l:#cce9ef;--teal-xl:#e6f7fb;--navy:#0D173B;--black1:#1A1A1A;--black2:#323232;--slate:#64748b;--border:#e2e8f0;--bg:#f8fafc}
         .sec{padding:88px 0}
         .wrap{max-width:1240px;margin:0 auto;padding:0 40px}
-        .eyebrow{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+        .eyebrow{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal-ink);margin-bottom:10px}
         .h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(28px,3.2vw,38px);font-weight:700;line-height:1.18;letter-spacing:-.3px;color:var(--navy)}
         .h2 em{font-style:italic;font-weight:500;color:var(--teal)}
         .rule{width:72px;height:2px;background:var(--teal);border-radius:2px}
@@ -65,7 +65,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
         .stats{background:#fff;border-radius:14px;display:grid;grid-template-columns:repeat(4,1fr);text-align:center;padding:26px 0;box-shadow:0 14px 44px rgba(13,23,59,.10)}
         .stats > div + div{border-left:1px solid #e8eaee}
         .stats .n{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:700;color:var(--navy);line-height:1}
-        .stats .l{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#7a7f8c;margin-top:7px;font-weight:400}
+        .stats .l{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6b7080;margin-top:7px;font-weight:400}
         @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         .fu{animation:fu .7s ease forwards}.fu1{animation:fu .7s .12s ease forwards;opacity:0}.fu2{animation:fu .7s .24s ease forwards;opacity:0}.fu3{animation:fu .7s .36s ease forwards;opacity:0}
         .prose p{margin-bottom:18px}.prose p:last-child{margin-bottom:0}
@@ -210,7 +210,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
                   {l.image_urls?.[0]
                     ? <img {...listingImageProps(l, l.image_urls[0], 0, { width: 640, widths: [400, 640, 960] })} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--teal-d)' }}>Photo via MLS</div>}
-                  {l.status && <div style={{ position: 'absolute', top: 12, left: 12, background: '#22c55e', color: '#fff', padding: '4px 11px', fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>Active</div>}
+                  {l.status && <div style={{ position: 'absolute', top: 12, left: 12, background: '#15803d', color: '#fff', padding: '4px 11px', fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>Active</div>}
                 </div>
                 <div style={{ padding: 22 }}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 22, fontWeight: 800, color: 'var(--navy)', marginBottom: 3 }}>{l.list_price ? '$' + l.list_price.toLocaleString() : '\u2014'}</div>
@@ -226,7 +226,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
                 </div>
                 <div style={{ padding: '7px 22px 12px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 7 }}>
                   <span style={{ fontSize: 9, color: 'var(--slate)' }}>Listing provided via BeachesMLS</span>
-                  <span style={{ fontSize: 11, color: 'var(--teal)', fontWeight: 600 }}>View &rarr;</span>
+                  <span style={{ fontSize: 11, color: 'var(--teal-ink)', fontWeight: 600 }}>View &rarr;</span>
                 </div>
               </a>
             ))}
@@ -287,11 +287,11 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
             <div className="a3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16 }}>
               {(amen.groups || []).map((g: any, i: number) => (
                 <div key={i} className="card" style={{ padding: '26px 24px' }}>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 14 }}>{g.title}</div>
+                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--teal-ink)', marginBottom: 14 }}>{g.title}</div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {(g.items || []).map((it: string, j: number) => (
                       <li key={j} style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--black2)', padding: '6px 0', borderTop: j ? '1px solid #eef2f6' : 'none', display: 'flex', gap: 8 }}>
-                        <span style={{ color: 'var(--teal)', fontWeight: 700 }}>&#8226;</span>{it}
+                        <span style={{ color: 'var(--teal-ink)', fontWeight: 700 }}>&#8226;</span>{it}
                       </li>
                     ))}
                   </ul>
@@ -402,9 +402,9 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
                       backgroundPosition: 'center top' }} />
                     <div style={{ padding: 22 }}>
                       <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 17, fontWeight: 700, color: 'var(--navy)', marginBottom: 3 }}>{a.name}</div>
-                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 14 }}>{a.role}</div>
-                      {a.email && <a href={`mailto:${a.email}`} style={{ display: 'block', fontSize: 12, color: 'var(--slate)', textDecoration: 'none', marginBottom: 5 }}>{a.email}</a>}
-                      {a.phone && <a href={`tel:${a.phone}`} style={{ display: 'block', fontSize: 12, color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>{a.phone}</a>}
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--teal-ink)', marginBottom: 14 }}>{a.role}</div>
+                      {a.email && <a href={`mailto:${a.email}`} style={{ display: 'block', fontSize: 12, color: 'var(--slate)', textDecoration: 'none', padding: '6px 0' }}>{a.email}</a>}
+                      {a.phone && <a href={`tel:${a.phone}`} style={{ display: 'block', fontSize: 12, color: 'var(--teal-ink)', fontWeight: 600, textDecoration: 'none', padding: '6px 0' }}>{a.phone}</a>}
                     </div>
                   </div>
                 ))}

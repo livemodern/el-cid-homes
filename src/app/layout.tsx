@@ -124,7 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body style={{ margin: 0, padding: 0, background: '#0a0a0a' }}>
         <Header logo={logo} />
         <AuthBackGuard />
-        {children}
+        <main>{children}</main>
         <Footer />
         {/* FUB Widget Tracker — REMOVED 2026-07-08. FUB downstream now;
             mlg-site 074fd0b handles server-side property view push. */}

@@ -61,7 +61,7 @@ export default function Footer() {
 
         {/* Col 2 — El Cid */}
         <div>
-          <h5 style={col_h5}>EL CID</h5>
+          <div style={col_h5}>EL CID</div>
           <Link href="/for-sale"     style={col_a}>Homes For Sale</Link>
           <Link href="/for-rent"     style={col_a}>For Rent</Link>
           <Link href="/recent-sales" style={col_a}>Recent Sales</Link>
@@ -71,7 +71,7 @@ export default function Footer() {
 
         {/* Col 3 — Communities (back to mlg-site umbrella) */}
         <div>
-          <h5 style={col_h5}>COMMUNITIES</h5>
+          <div style={col_h5}>COMMUNITIES</div>
           <a href={`${MLG_SITE_URL}/downtown-west-palm-beach`} style={col_a}>Downtown West Palm Beach</a>
           <a href={`${MLG_SITE_URL}/downtown-delray-beach`}   style={col_a}>Downtown Delray Beach</a>
           <a href={`${MLG_SITE_URL}/palm-beach-gardens`}      style={col_a}>Palm Beach Gardens</a>
@@ -85,7 +85,7 @@ export default function Footer() {
 
         {/* Col 4 — About MLG */}
         <div>
-          <h5 style={col_h5}>ABOUT MLG</h5>
+          <div style={col_h5}>ABOUT MLG</div>
           <a href={`${MLG_SITE_URL}/about-us`}        style={col_a}>Our Company</a>
           <a href={`${MLG_SITE_URL}/agents`}          style={col_a}>Our Agents</a>
           <a href={`${MLG_SITE_URL}/why-list-with-us`} style={col_a}>Why List With Us</a>

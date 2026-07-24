@@ -15,7 +15,7 @@ const DISPLAY = "'Plus Jakarta Sans', sans-serif";
 const BODY    = "'Poppins', sans-serif";
 
 const STATUS_COLORS: Record<string, string> = {
-  Active: '#22c55e',
+  Active: '#15803d',
   Pending: '#f59e0b',
   Closed: '#6b7280',
 };
@@ -153,7 +153,7 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
                     ? <CardPhotos urls={l.image_urls} total={(l as any).photos_total ?? l.image_urls.length} alt={listingImageAlt(l, 0)} width={640} widths={[400, 640, 960]} />
                     : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 40 }}>🏙️</div>}
                   {/* Status badge — show "Available" instead of "Active", "Leased" instead of "Closed" */}
-                  <span style={{ position: 'absolute', top: 12, left: 12, background: (l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : l.status === 'Active' ? '#22c55e' : '#6b7280', color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', fontFamily: DISPLAY }}>
+                  <span style={{ position: 'absolute', top: 12, left: 12, background: (l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : l.status === 'Active' ? '#15803d' : '#6b7280', color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', fontFamily: DISPLAY }}>
                     {(l.days_on_market != null && l.days_on_market <= 10) ? 'New' : l.status === 'Active' ? 'Available' : l.status === 'Closed' ? 'Leased' : l.status}
                   </span>
                 </div>
