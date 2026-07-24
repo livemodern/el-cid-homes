@@ -1083,6 +1083,13 @@ export default function SearchPageClient() {
     if (location) {
       const f = location.filter;
       if (f.building_name)        p.set('building_name', f.building_name);
+      // CMS-page primitives. community_slug scopes to a building/community
+      // page; polygon scopes to a drawn boundary. Without these, picking a
+      // page suggestion set no location param and searched the whole county.
+      if (f.community_slug)       p.set('community_slug', f.community_slug);
+      if (location.polygon && location.polygon.length >= 3) {
+        p.set('polygon', JSON.stringify(location.polygon));
+      }
       if (f.city)                 p.set('city', f.city);
       if (f.zip)                  p.set('zip', f.zip);
       if (f.subdivision_like)     p.set('subdivision_like', f.subdivision_like);
@@ -1233,7 +1240,7 @@ export default function SearchPageClient() {
               // user's existing preferences; preserve everything in those
               // cases. (Patrick's bug, 2026-05-28: picking 33401 was
               // wiping his price/beds/baths.)
-              const isDrillIn = loc?.type === 'building' || loc?.type === 'community' || loc?.type === 'address';
+              const isDrillIn = loc?.type === 'building' || loc?.type === 'community' || loc?.type === 'address' || (loc?.type === 'page' && loc?.page_type !== 'city');
               if (loc && isDrillIn) setFilters(f => ({
                 ...f,
                 city:     'Any',

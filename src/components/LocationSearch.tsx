@@ -17,11 +17,36 @@ const TYPE_LABEL: Record<string, string> = {
   community: 'Community',
   city:      'City',
   zip:       'ZIP Code',
+  page:      'Community',
 };
 
+// CMS-page taxonomy -> chip label. 'page' is internal jargon; show the
+// underlying page_type so a building page reads "Building" and a city
+// page reads "City", matching mlg-site.
+const PAGE_TYPE_LABEL: Record<string, string> = {
+  city:         'City',
+  neighborhood: 'Neighborhood',
+  community:    'Community',
+  building:     'Building',
+  collection:   'Collection',
+};
+
+export function labelFor(type: string, pageType?: string | null): string {
+  if (type === 'page') return PAGE_TYPE_LABEL[pageType || ''] || 'Community';
+  return TYPE_LABEL[type] || type;
+}
+
 export type LocationFilter = {
-  type: 'building' | 'community' | 'city' | 'zip' | 'address';
+  type: 'building' | 'community' | 'city' | 'zip' | 'address' | 'page';
   name: string;
+  // CMS-page taxonomy (city / neighborhood / community / building /
+  // collection). Threaded through so the chip labels correctly AND so the
+  // drill-in filter reset can skip CITY pages (wiping price/beds on a
+  // city-wide pick is wrong — mlg-site regression, Patrick 2026-07-11).
+  page_type?: string | null;
+  // Drawn boundary for CMS pages that have one. Emitted as `polygon` to
+  // /api/search, which bbox-prefilters in SQL then point-in-polygon tests.
+  polygon?: [number, number][] | null;
   filter: Record<string, any>;
 };
 
@@ -31,6 +56,9 @@ type Suggestion = {
   count: number;
   is_parent: boolean;
   filter: Record<string, any>;
+  slug?: string | null;
+  page_type?: string | null;
+  polygon?: [number, number][] | null;
 };
 
 type Props = {
@@ -47,6 +75,7 @@ function TypeIcon({ type, size = 18 }: { type: string; size?: number }) {
   const color = '#64748b';
   if (type === 'building')  return <IconBuilding size={size} color={color} />;
   if (type === 'community') return <IconCommunity size={size} color={color} />;
+  if (type === 'page')      return <IconCommunity size={size} color={color} />;
   if (type === 'city')      return <IconLocation size={size} color={color} />;
   if (type === 'zip')       return <IconZip size={size} color={color} />;
   return <IconLocation size={size} color={color} />;
@@ -88,6 +117,41 @@ export default function LocationSearch({ value, onChange, placeholder = 'Search 
   }, [query, value, fetchSuggestions]);
 
   function selectSuggestion(s: Suggestion) {
+    // ── CMS-page suggestions ──────────────────────────────────────────
+    // mlg-site's suggest endpoint returns type:'page' for buildings,
+    // communities, neighbourhoods and cities, carrying {slug, polygon}
+    // rather than the legacy building_name/city primitives. This fork
+    // handled none of them, so every page pick applied NO filter and the
+    // search silently went county-wide. Semantics mirror mlg-site's
+    // LocationSearch exactly.
+    //
+    // Mini-sites always filter IN PLACE — never navigate to /{slug},
+    // because the curated community page lives on modernlivingre.com,
+    // not on this domain.
+    if (s.type === 'page' && s.slug) {
+      // Page with a drawn boundary -> polygon filter.
+      if (s.polygon && s.polygon.length >= 3) {
+        onChange({
+          type: 'page', name: s.name, page_type: s.page_type ?? null,
+          filter: s.filter, polygon: s.polygon,
+        });
+        setQuery(''); setSugs([]); setOpen(false); setHL(-1);
+        return;
+      }
+      // CITY pages must filter on the properties.city column — no
+      // property carries a city slug in community_slug, so synthesising
+      // community_slug = page slug returns 0 listings.
+      const isCityPage = s.page_type === 'city';
+      onChange({
+        type: 'page', name: s.name, page_type: s.page_type ?? null,
+        filter: isCityPage
+          ? { ...s.filter, city: s.name }
+          : { ...s.filter, community_slug: s.filter?.community_slug || s.slug },
+        polygon: null,
+      });
+      setQuery(''); setSugs([]); setOpen(false); setHL(-1);
+      return;
+    }
     onChange({ type: s.type as any, name: s.name, filter: s.filter });
     setQuery('');
     setSugs([]);
@@ -168,7 +232,7 @@ export default function LocationSearch({ value, onChange, placeholder = 'Search 
             <TypeIcon type={value.type} size={12} />
             {value.name}
             <span style={{ fontSize: 10, color: SLATE, marginLeft: 2, fontWeight: 400 }}>
-              {TYPE_LABEL[value.type]}
+              {labelFor(value.type, value.page_type)}
             </span>
           </span>
           <button onClick={clear} style={{ background: 'none', border: 'none', cursor: 'pointer', color: SLATE, fontSize: 11, fontFamily: BODY }}>
@@ -203,7 +267,7 @@ export default function LocationSearch({ value, onChange, placeholder = 'Search 
                   {s.is_parent && <span style={{ marginLeft: 4, fontSize: 10, color: TEAL, fontWeight: 600 }}>ALL</span>}
                 </div>
                 <div style={{ fontSize: 10, color: SLATE, fontFamily: BODY }}>
-                  {TYPE_LABEL[s.type]} · {s.count.toLocaleString()} listings
+                  {labelFor(s.type, s.page_type)} · {s.count.toLocaleString()} listings
                 </div>
               </div>
               <span style={{
@@ -212,7 +276,7 @@ export default function LocationSearch({ value, onChange, placeholder = 'Search 
                 color: s.type === 'building' ? '#16a34a' : s.type === 'city' ? '#1d4ed8' : SLATE,
                 flexShrink: 0,
               }}>
-                {TYPE_LABEL[s.type]}
+                {labelFor(s.type, s.page_type)}
               </span>
             </button>
           ))}
