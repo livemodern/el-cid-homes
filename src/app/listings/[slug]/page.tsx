@@ -51,7 +51,24 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
   const unit = l.unit_number ? `Unit ${l.unit_number}` : (l.street_address || 'Home')
   const bld = l.building_name || 'El Cid'
   const isRent = l.sale_or_lease === 'Lease' || l.property_type === 'ResidentialLease'
-  const title = `${unit} · ${bld}, ${money(l.list_price)}${isRent ? '/mo' : ''} | El Cid Homes`
+  // Title leads with the STREET ADDRESS (Patrick 2026-07-24). The prior
+  // shape dropped the address whenever a unit number existed, so the page
+  // couldn't match the address query it is best positioned to win, and it
+  // repeated the site name twice. Address + unit -> query match; building
+  // name kept (it is the page's key term); beds/type/intent qualifiers.
+  const streetOnly = (l.street_address || '').split(',')[0].trim()
+  const addrLine = [streetOnly || 'Residence', l.unit_number ? `#${l.unit_number}` : null]
+    .filter(Boolean).join(' ')
+  const kindWord = /condo|co-?op/i.test(l.property_subtype || '')
+    ? 'Condo'
+    : /town/i.test(l.property_subtype || '')
+      ? 'Townhome'
+      : /single|residence|home|villa/i.test(l.property_subtype || '')
+        ? 'Home'
+        : (l.building_name ? 'Condo' : 'Home')
+  const specLine = [l.beds ? `${l.beds}-Bed` : null, kindWord, isRent ? 'for Rent' : 'for Sale']
+    .filter(Boolean).join(' ')
+  const title = `${addrLine} — ${specLine} at ${bld} | ${money(l.list_price)}${isRent ? '/mo' : ''}`.replace(/\s+/g, ' ').trim()
   const desc = (l.description || `${l.beds ?? ''} bed ${l.baths ?? ''} bath residence at ${bld}, ${l.city}, FL.`)
     .replace(/\s+/g, ' ').slice(0, 180)
   const canonicalSlug = slugifyListing(l as any)
