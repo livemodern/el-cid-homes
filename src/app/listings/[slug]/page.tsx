@@ -56,8 +56,14 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
   // couldn't match the address query it is best positioned to win, and it
   // repeated the site name twice. Address + unit -> query match; building
   // name kept (it is the page's key term); beds/type/intent qualifiers.
-  const streetOnly = (l.street_address || '').split(',')[0].trim()
-  const addrLine = [streetOnly || 'Residence', l.unit_number ? `#${l.unit_number}` : null]
+  const unitStr = String(l.unit_number || '').trim()
+  let streetOnly = (l.street_address || '').split(',')[0].trim()
+  // street_address usually already ends with the unit ("6530 Boca Del Mar
+  // Drive 337") — strip it so the title doesn't read "Drive 337 #337".
+  if (unitStr && streetOnly.toLowerCase().endsWith(unitStr.toLowerCase())) {
+    streetOnly = streetOnly.slice(0, streetOnly.length - unitStr.length).replace(/[\s#,-]+$/, '').trim()
+  }
+  const addrLine = [streetOnly || 'Residence', unitStr ? `#${unitStr}` : null]
     .filter(Boolean).join(' ')
   const kindWord = /condo|co-?op/i.test(l.property_subtype || '')
     ? 'Condo'
