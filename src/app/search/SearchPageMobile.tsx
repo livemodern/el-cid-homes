@@ -206,9 +206,9 @@ const CITY_OPTIONS: string[] = [
   'Palm Springs', 'Lantana', 'The Acreage', 'Loxahatchee',
   'Juno Beach', 'Westlake', 'South Palm Beach', 'Lake Park',
   'Tequesta', 'Hypoluxo', 'Ocean Ridge', 'Loxahatchee Groves',
-  'Atlantis', 'Palm Beach Shores', 'Gulf Stream',
-  'Lake Clarke Shores', 'Manalapan', 'Briny Breezes', 'Mangonia Park',
-  'Haverhill', 'Jupiter Inlet Colony',
+  'Atlantis', 'Palm Beach Shores', 'Gulf Stream', 'Lake Clarke Shores',
+  'Manalapan', 'Briny Breezes', 'Mangonia Park', 'Haverhill',
+  'Jupiter Inlet Colony', 'Stuart', 'Palm City'
 ];
 
 // ── Default export ───────────────────────────────────────────────────────

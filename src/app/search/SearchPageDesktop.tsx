@@ -10,6 +10,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { slugifyListing } from '@/lib/listing-slug';
 import { AccountButton } from '@/components/AccountButton';
 import { imgOpt, imgSrcSet } from '@/lib/img';
+import { SEARCH_SITE, defaultCenter } from '@/lib/search-site';
 
 mapboxgl.accessToken = (process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '');
 
@@ -214,14 +215,9 @@ const STATUS_LABEL_TO_API: Record<string, string> = {
   'All Statuses': 'All',
 };
 
-// El Cid mini-site default: open centered on the El Cid historic district (Two City
-// Plaza's market) rather than the full county. Panning/searching still covers
-// all of PBC + Martin — this only sets the initial viewport.
-// Downtown WPB polygon bounding box (community_match_rules.polygon for
-// 'downtown-west-palm-beach', captured 2026-06-19). The mini-site lands on
-// this box so the first paint shows downtown inventory rather than the whole
-// county; users can pan the map or change filters to widen.
-const DEFAULT_BOUNDS = '-80.0640,26.6800,-80.0410,26.7030';
+// Initial map viewport comes from the per-site config module — the
+// ONLY search value allowed to differ between mini-sites.
+const DEFAULT_BOUNDS = SEARCH_SITE.defaultBounds;
 
 // A URL `bounds` string is only honored if it actually overlaps our service
 // area (Palm Beach + Martin counties). Stale or shared links can carry a
@@ -256,9 +252,9 @@ const CITY_OPTIONS: string[] = [
   'Palm Springs', 'Lantana', 'The Acreage', 'Loxahatchee',
   'Juno Beach', 'Westlake', 'South Palm Beach', 'Lake Park',
   'Tequesta', 'Hypoluxo', 'Ocean Ridge', 'Loxahatchee Groves',
-  'Atlantis', 'Palm Beach Shores', 'Gulf Stream',
-  'Lake Clarke Shores', 'Manalapan', 'Briny Breezes', 'Mangonia Park',
-  'Haverhill', 'Jupiter Inlet Colony',
+  'Atlantis', 'Palm Beach Shores', 'Gulf Stream', 'Lake Clarke Shores',
+  'Manalapan', 'Briny Breezes', 'Mangonia Park', 'Haverhill',
+  'Jupiter Inlet Colony', 'Stuart', 'Palm City'
 ];
 
 function fmtPrice(n: number | null): string {
@@ -815,7 +811,7 @@ export default function SearchPageClient() {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
-      center: [-80.0520, 26.6905], // El Cid centroid (bbox center)
+      center: defaultCenter(), // derived from DEFAULT_BOUNDS, never hand-set
       zoom: 13,
     });
     map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
