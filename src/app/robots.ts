@@ -12,7 +12,21 @@ export default function robots(): MetadataRoute.Robots {
     return { rules: [{ userAgent: '*', disallow: '/' }] }
   }
   return {
-    rules: [{ userAgent: '*', allow: '/' }],
+    rules: [{
+      userAgent: '*',
+      allow: '/',
+      // Crawler-only; never affects how pages render for real users.
+      //  /_next/image = optimized MLS-photo variants walked through the
+      //    optimizer -> /api/proxy/image -> a function invocation + Cotality
+      //    fetch each; never indexable, pure wasted crawl + cost.
+      //  /api/ = all API routes.
+      //  /search = the county-wide MLS search. On a single-building mini it's
+      //    client-rendered (ssr:false, no crawlable state) and has no SEO
+      //    value — the building's own pages are the money pages — so keep it
+      //    out of the index and off the crawl budget.
+      // Fleet crawl/cost hygiene, Patrick 2026-07-27 (matches mlg-site 0e8a3ef).
+      disallow: ['/_next/image', '/api/', '/search'],
+    }],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
   }

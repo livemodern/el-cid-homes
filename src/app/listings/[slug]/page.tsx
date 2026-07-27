@@ -17,7 +17,7 @@ import { BUILDING_NAME, ALERT_FILTER, ALERT_KIND, ALERT_SOURCE } from '@/lib/bui
 
 // ISR: cache + regenerate every 60s. Server-rendered HTML drops TTFB to ~50ms
 // for readers in the window; sync runs hourly so 60s staleness is invisible.
-export const revalidate = 60
+export const revalidate = 3600  // was 60; raised fleet-wide 2026-07-27 (crawl cost)
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://elcidhomes.com'
 const money = (n: number | null | undefined) => (n == null ? '—' : '$' + Math.round(n).toLocaleString())
