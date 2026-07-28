@@ -142,7 +142,7 @@ export async function signUp(args: {
     sms_consent_at: smsConsent ? new Date().toISOString() : null,
     sms_consent_text: smsConsent ? (smsConsentText || null) : null,
   };
-  let { error: regErr } = await sb.from('registrations').insert(regRow as any);  // table absent from generated types
+  let { error: regErr } = await sb.from('registrations').upsert(regRow as any, { onConflict: 'user_id', ignoreDuplicates: true });  // table absent from generated types
   // Defensive retry — strip columns the schema hasn't picked up yet so the
   // migration window never blocks account creation.
   if (regErr && /sms_consent|user_type|column|schema cache/i.test(regErr.message || '')) {
@@ -150,7 +150,7 @@ export async function signUp(args: {
     delete regRow.sms_consent_at;
     delete regRow.sms_consent_text;
     delete regRow.user_type;
-    ({ error: regErr } = await sb.from('registrations').insert(regRow as any));
+    ({ error: regErr } = await sb.from('registrations').upsert(regRow as any, { onConflict: 'user_id', ignoreDuplicates: true }));
   }
   // If registrations row fails we still consider sign up "successful" —
   // the user can sign in, and an admin can repair the missing row. Better
