@@ -184,12 +184,12 @@ function AccountInner() {
 
   return (
     <div style={{ background: '#f6f8fb', minHeight: 'calc(100vh - 220px)', fontFamily: BODY }}>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .acct-grid { display: grid; grid-template-columns: 1fr 340px; gap: 26px; align-items: start; }
         @media (max-width: 920px) { .acct-grid { grid-template-columns: 1fr; } .acct-side { position: static !important; } }
         .acct-card-link { transition: transform .2s ease, box-shadow .2s ease; }
         .acct-card-link:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(13,23,59,.10); }
-      `}</style>
+      ` }} />
 
       {/* ── Hero ── */}
       <div style={{ background: `linear-gradient(125deg, ${NAVY} 0%, #14306e 100%)`, color: '#fff', padding: '40px 24px 44px' }}>

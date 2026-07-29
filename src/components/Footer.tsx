@@ -146,7 +146,7 @@ export default function Footer() {
       </div>
 
       {/* ── Responsive — collapse 4 cols to 2 then 1 ─── */}
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 900px) {
           footer .tcp-foot-cols { grid-template-columns: 1fr 1fr !important; gap: 30px !important; }
           footer { padding: 48px 22px 0 !important; }
@@ -155,7 +155,7 @@ export default function Footer() {
           footer .tcp-foot-cols { grid-template-columns: 1fr !important; }
         }
         footer a:hover { color: ${TEAL} !important; }
-      `}</style>
+      ` }} />
     </footer>
   );
 }

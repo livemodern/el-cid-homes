@@ -40,7 +40,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
 
   return (
     <div style={{ fontFamily: "'Poppins',sans-serif", background: '#ffffff', color: '#323232' }}>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         *{margin:0;padding:0;box-sizing:border-box}
         :root{--teal:#00B2CC;--teal-d:#0095AD;--teal-l:#cce9ef;--teal-xl:#e6f7fb;--navy:#0D173B;--black1:#1A1A1A;--black2:#323232;--slate:#64748b;--border:#e2e8f0;--bg:#f8fafc}
         .sec{padding:88px 0}
@@ -88,7 +88,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
           .facontent{padding:32px 26px !important}
           .facta{width:100% !important;justify-content:center !important}
         }
-      `}</style>
+      ` }} />
 
       {/* HERO */}
       <section style={{ height: '72vh', position: 'relative', display: 'flex', alignItems: 'flex-end', paddingBottom: 110, overflow: 'hidden', background: 'var(--navy)' }}>

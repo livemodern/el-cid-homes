@@ -36,7 +36,7 @@ export default function Header({ logo = '/mlg-logo-white.svg' }: { logo?: string
 
   return (
     <>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         /* Mothership header: white, 3-col grid, animated teal underlines */
         .tcp-hd-grid {
           /* Header spans full viewport: logo anchors to the left edge (4vw
@@ -93,7 +93,7 @@ export default function Header({ logo = '/mlg-logo-white.svg' }: { logo?: string
           .tcp-hd-right  { display: none !important; }
           .tcp-ham       { display: flex !important; }
         }
-      `}</style>
+      ` }} />
 
       <header style={{
         position:     'fixed',
