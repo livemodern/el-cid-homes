@@ -99,6 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             reference keeps working. Replaces the render-blocking Google Fonts
             stylesheet (~750ms on mobile per PSI, 2026-07-23). Preload the two
             above-the-fold faces: Jakarta variable (headings) + Poppins 300 (body). */}
+        <link rel="preconnect" href="https://images.mlrecloud.com" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/plus-jakarta-sans-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/poppins-300.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         {/* Favicons are declared via Next.js file convention at src/app/icon.png +

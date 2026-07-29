@@ -171,6 +171,7 @@ export function listingImageAlt(listing: ListingForAlt, idx: number = 0): string
 // ── Spread-ready <img> props for a listing photo ─────────────────────────
 
 type ImgProps = {
+  fetchPriority?: 'high' | 'low' | 'auto';
   src: string;
   srcSet?: string;
   sizes?: string;
@@ -201,6 +202,7 @@ export function listingImageProps(
     sizes: opts.sizes ?? '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw',
     alt: listingImageAlt(listing, idx),
     loading: opts.eager ? 'eager' : 'lazy',
+    fetchPriority: opts.eager ? undefined : 'low',
     decoding: 'async',
   };
 }
