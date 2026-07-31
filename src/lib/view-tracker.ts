@@ -13,6 +13,7 @@
 
 import { useEffect, useState } from 'react';
 import { getSupabase } from '@/lib/auth';
+import { readPlansViewed } from '@/lib/floorplan-tracker';
 
 const STORAGE_KEY = 'mlg.viewed_listings';
 
@@ -39,6 +40,15 @@ export function recordView(mlsId: string): number {
   cur.push(mlsId);
   writeViewed(cur);
   return cur.length;
+}
+
+// ─── Combined gate counter ────────────────────────────────────────────
+// Patrick 2026-07-30: a listing and a floor plan each count as ONE toward the
+// SAME allowance — "2nd property or floorplan". They used to be two separate
+// counters compared against the same limit, so a visitor could see one under
+// each and never hit the wall, which is 2x the intended free browsing.
+export function gateCount(): number {
+  return readViewed().length + readPlansViewed().length;
 }
 
 export function getViewCount(): number {

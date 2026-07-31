@@ -15,6 +15,7 @@ import { imgOpt } from '@/lib/img';
 import { useUser } from '@/lib/auth';
 import { AuthModal } from '@/components/AuthModal';
 import { recordPlanView, getPlanViewCount } from '@/lib/floorplan-tracker';
+import { gateCount } from '@/lib/view-tracker';
 
 type Plan = { label?: string; name?: string; beds?: string; baths?: string; sqft?: string; image?: string };
 
@@ -45,8 +46,9 @@ export default function HomeFloorPlans({
 
   const open = (p: Plan) => {
     if (gateEnabled && !loading && !signedIn && gateLimit > 0) {
-      const seen = recordPlanView(planName(p));
-      if (seen >= gateLimit) { setGateOpen(true); return; }
+      recordPlanView(planName(p));
+      // A plan and a listing share ONE allowance.
+      if (gateCount() >= gateLimit) { setGateOpen(true); return; }
     }
     setSelected(p);
   };
