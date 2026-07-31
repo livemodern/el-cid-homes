@@ -10,6 +10,7 @@ import { useUser, getSupabase } from '@/lib/auth';
 import { AuthModal } from '@/components/AuthModal';
 import { getViewedListings } from '@/lib/view-tracker';
 import SmsConsentDisclosure, { SMS_CONSENT_TEXT } from '@/components/SmsConsentDisclosure';
+import { fire, setTrackerIdentity, trackedSessionId } from '@/lib/site-tracker';
 
 const TEAL    = '#00B2CC';
 const NAVY    = '#0D173B';
@@ -157,9 +158,14 @@ export function InquireModal({ open, onClose, listing, siteSlug = 'el-cid-homes'
           siteSlug,
           smsConsent,
           smsConsentText: smsConsent ? SMS_CONSENT_TEXT : null,
+          sessionId: trackedSessionId(),
         }),
       });
       if (!res.ok) throw new Error('Failed');
+      // Known visitor from here: everything after attaches, and /api/leads
+      // back-stitches what they looked at BEFORE filling this in.
+      setTrackerIdentity({ user_id: null, email: form.email });
+      fire('form_submit', { data: { form: 'property-inquiry', mls_id: listing?.mls_id ?? null }, immediate: true });
       setStep('done');
     } catch {
       setError('Something went wrong. Please try again.');

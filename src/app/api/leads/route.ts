@@ -149,6 +149,24 @@ export async function POST(req: NextRequest) {
             console.warn('native CRM bridge failed (non-fatal):', e);
           }
         }
+
+        // Generic session back-stitch (Patrick 2026-07-30). The block above only
+        // fires for REGISTRATIONS and resolves the session through
+        // registrations.user_id - so a plain inquiry, where the person never makes
+        // an account, adopted nothing. The form now hands us its session id
+        // directly, claiming everything this browser looked at BEFORE the form.
+        if (contactId && !isRegistration) {
+          const sid = typeof body?.sessionId === 'string' ? body.sessionId.trim() : '';
+          if (sid) {
+            try {
+              const sbStitch = getSupabase();
+              await sbStitch.from('site_events').update({ contact_id: contactId })
+                .eq('session_id', sid).is('contact_id', null);
+            } catch (e) {
+              console.warn('session back-stitch failed (non-fatal):', e);
+            }
+          }
+        }
       } catch (e) {
         console.error('FUB lead submission failed (non-fatal):', e);
       }

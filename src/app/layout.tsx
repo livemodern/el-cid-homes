@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 // FubPixel removed 2026-07-08 — matches mlg-site 5d849cf + TCP b15977f4.
 // FUB downstream; server-side push from mlg-site 074fd0b handles view sync.
 import { AuthBackGuard } from '@/components/AuthBackGuard';
+import SiteTracker from '@/components/SiteTracker';
 
 // Single source of truth for the public domain + index gate. At cutover set
 // NEXT_PUBLIC_SITE_URL=https://elcidhomes.com and SITE_INDEXABLE=true
@@ -108,7 +109,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             site_events. data-site-slug tags every event with THIS site so it
             resolves per-contact + attributes traffic to El Cid.
             Cross-origin POST to modernlivingre.com/api/track (CORS allowlisted). */}
-        <script async src="https://modernlivingre.com/pixel.js" data-site-slug="el-cid-homes" />
+        {/* pixel.js REMOVED 2026-07-30 - fired with email:null so no pageview
+            ever attached to a contact. <SiteTracker /> below does it same-origin
+            carrying the identity cookie. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(agentJsonLd) }} />
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
@@ -123,6 +126,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       </head>
       <body style={{ margin: 0, padding: 0, background: '#0a0a0a' }}>
+        <SiteTracker />
         <Header logo={logo} />
         <AuthBackGuard />
         <main>{children}</main>
