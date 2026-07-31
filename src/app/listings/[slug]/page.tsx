@@ -14,6 +14,7 @@ import InquireButton from '@/components/InquireButton'
 import RequestShowing from '@/components/RequestShowing'
 import BuildingAlerts from '@/components/BuildingAlerts'
 import { BUILDING_NAME, ALERT_FILTER, ALERT_KIND, ALERT_SOURCE } from '@/lib/building'
+import TrackListingView from '@/components/TrackListingView'
 
 // ISR: cache + regenerate every 60s. Server-rendered HTML drops TTFB to ~50ms
 // for readers in the window; sync runs hourly so 60s staleness is invisible.
@@ -404,6 +405,7 @@ export default async function ListingPage({ params }: { params: any }) {
       </p>
 
       <ListingGate mlsId={l.mls_id} limit={gateLimit} enabled={gateEnabled} />
+      <TrackListingView mlsId={l.mls_id} />
       <ListingClient mcImgs={mcImgs} lbImgs={lbImgs} lng={lng} lat={lat} price={isRent ? 0 : price} hoa={hoa} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonld) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />

@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { recordView, recordViewToServer } from '@/lib/view-tracker';
 import { useUser } from '@/lib/auth';
 import { AuthModal } from '@/components/AuthModal';
-import { fire } from '@/lib/site-tracker';
 
 export default function ListingGate({ mlsId, limit, enabled }: { mlsId: string; limit: number; enabled: boolean }) {
   const { user, loading } = useUser();
@@ -15,11 +14,7 @@ export default function ListingGate({ mlsId, limit, enabled }: { mlsId: string; 
   const [justSignedIn, setJustSignedIn] = useState(false);
 
   useEffect(() => {
-    if (!mlsId) return;
-    setCount(recordView(String(mlsId)));
-    // Identified listing_view for EVERYONE - recordViewToServer below only
-    // ever fired for signed-in users.
-    fire('listing_view', { data: { mls_id: String(mlsId) } });
+    if (mlsId) setCount(recordView(String(mlsId)));
   }, [mlsId]);
 
   // Signed-in users: persist each view live (flush only covers the
