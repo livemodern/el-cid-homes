@@ -52,3 +52,26 @@ export async function checkLeadSpam(
     return { spam: false, reason: "error" };
   }
 }
+
+/**
+ * Record a rejection the LOCAL filter already made.
+ *
+ * isBot() returns before the classifier is ever called, so a locally-rejected
+ * submission used to leave NO trace anywhere — and the local filter is where
+ * most rejections happen, which left the audit trail with a hole exactly where
+ * it mattered. lead-utils mirrors mlg-admin's lib/lead-identity exactly
+ * (verified in parity over 20,338 real rows), so the classifier independently
+ * reaches the same verdict and writes the row to lead_spam_log. The verdict
+ * itself is discarded — we only want the trail.
+ *
+ * Awaited by callers because Vercel kills the instance at response, and only
+ * ever reached on an ALREADY-rejected submission, so it costs a real lead
+ * nothing.
+ */
+export async function reportLocalReject(input: SpamCheckInput): Promise<void> {
+  try {
+    await checkLeadSpam(input);
+  } catch {
+    /* logging only — never throws, never blocks */
+  }
+}

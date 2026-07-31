@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { isBot } from '@/lib/lead-utils';
-import { checkLeadSpam } from '@/lib/spam-check-client';
+import { checkLeadSpam, reportLocalReject } from '@/lib/spam-check-client';
 import { recordLeadRouting } from '@/lib/route-lead-client';
 
 // Lazy init — module-scope createClient crashes builds in environments
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
 
     // Bot check — local identity heuristics (free, no network).
     if (!isRegistration && isBot({ ...contact, message })) {
+      await reportLocalReject({ ...contact, message, source: siteSlug });
       return NextResponse.json({ success: true }); // silent reject
     }
 
