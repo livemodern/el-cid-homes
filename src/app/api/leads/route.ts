@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { isBot } from '@/lib/lead-utils';
+import { checkLeadSpam } from '@/lib/spam-check-client';
 import { recordLeadRouting } from '@/lib/route-lead-client';
 
 // Lazy init — module-scope createClient crashes builds in environments
@@ -48,9 +49,22 @@ export async function POST(req: NextRequest) {
 
     const contact = { firstName: first, lastName: last, email, phone };
 
-    // Bot check
-    if (isBot({ ...contact, message })) {
+    // Bot check — local identity heuristics (free, no network).
+    if (!isRegistration && isBot({ ...contact, message })) {
       return NextResponse.json({ success: true }); // silent reject
+    }
+
+    // Central classifier (mlg-admin): the same identity layer plus keyword +
+    // Claude, which is what catches coherent B2B solicitation the local filter
+    // reads as a well-formed human. This site was never wired to it — it ran
+    // the local filter alone. Skipped for registrations (an account signup
+    // with a password is intent by definition). Fail-open.
+    if (!isRegistration) {
+      const verdict = await checkLeadSpam({ ...contact, message, source: siteSlug });
+      if (verdict.spam) {
+        console.warn('[leads] spam rejected:', verdict.reason);
+        return NextResponse.json({ success: true }); // silent reject
+      }
     }
 
     // 1. Save to Supabase leads table
