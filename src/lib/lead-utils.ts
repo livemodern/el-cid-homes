@@ -92,7 +92,12 @@ function nameWords(first?: string | null, last?: string | null): string[] {
 function longestConsonantRun(word: string): number {
   let best = 0;
   let cur = 0;
-  for (const ch of word) {
+  // Indexed, not for..of — iterating a string requires downlevelIteration,
+  // and mlg-site's tsconfig sets no `target` at all, so TypeScript defaults it
+  // to ES5 there. This exact file ships to every repo in the fleet unchanged
+  // (es2017 everywhere else), so it has to compile on the lowest of them.
+  for (let i = 0; i < word.length; i += 1) {
+    const ch = word.charAt(i);
     if (/[a-z]/.test(ch) && !VOWELS.includes(ch)) {
       cur += 1;
       if (cur > best) best = cur;
@@ -128,7 +133,7 @@ export function botScore(data: {
     // A Latin-script name with no vowel at all. Five letters or more is the
     // signature of keyboard mash ("Cvdwjrhm", "Bsbsbsbdh", "Kjvbsjkbf"); four
     // is ambiguous enough (initialisms, "Smth") to only be a partial.
-    const hasVowel = [...core].some((c) => VOWELS.includes(c));
+    const hasVowel = /[aeiouy]/.test(core);
     if (!hasVowel && core.length >= 5) add(50);
     else if (!hasVowel && core.length === 4) add(30);
 
@@ -165,7 +170,7 @@ export function botScore(data: {
     if (digits.length !== 10) {
       add(20);
     } else {
-      if (new Set(digits).size <= 2) add(40);
+      if (new Set(digits.split('')).size <= 2) add(40);
       if ('01234567890'.includes(digits) || '09876543210'.includes(digits)) add(40);
 
       if (!'01'.includes(digits[0])) {
