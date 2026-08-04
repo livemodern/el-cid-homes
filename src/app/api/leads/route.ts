@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { isBot } from '@/lib/lead-utils';
 import { checkLeadSpam, reportLocalReject } from '@/lib/spam-check-client';
@@ -68,6 +69,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // The visitor's tracking session. Read from the cookie the tracker
+    // mirrors it into, falling back to an explicit payload field. Stored on
+    // the lead because it is the ONLY bridge from anonymous pre-form
+    // browsing to a person: logged-out events carry no user_id, and the
+    // hourly backfill-site-events cron adopts them off exactly this column.
+    let sessionId: string | null =
+      typeof body?.sessionId === 'string' && body.sessionId.trim() ? body.sessionId.trim() : null;
+    if (!sessionId) {
+      try { sessionId = cookies().get('mlg_sid')?.value?.trim() || null; } catch { /* not in a request scope */ }
+    }
+
     // 1. Save to Supabase leads table
     const { data: lead } = await getSupabase().from('leads').insert({
       first_name:      first || null,
@@ -79,6 +91,7 @@ export async function POST(req: NextRequest) {
       source_type:     isRegistration ? 'registration' : (source || 'contact-form'),
       mls_id:          mls_id || null,
       listing_address: listing || null,
+      session_id:      sessionId,
     }).select().maybeSingle();
 
     // userType lowercased becomes a FUB tag (mirrors mlg-site behavior).

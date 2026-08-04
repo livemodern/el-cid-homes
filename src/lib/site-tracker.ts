@@ -19,6 +19,7 @@ const COOKIE_UID = 'mlg_uid';
 const COOKIE_UEM = 'mlg_uem';
 const COOKIE_ATTR = 'mlg_attr';
 const SESSION_KEY = 'mlg_sid';
+const SESSION_COOKIE = 'mlg_sid';
 const FLUSH_MS = 4000;
 
 export type SiteEventType =
@@ -63,6 +64,13 @@ export function clearTrackerIdentity(): void {
 }
 export function trackedEmail(): string | null { return identity.email; }
 
+function writeSessionCookie(sid: string): void {
+  if (typeof document === 'undefined' || !sid) return;
+  try {
+    document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(sid)}; path=/; SameSite=Lax`;
+  } catch { /* cookies disabled — falls back to whatever the form sends */ }
+}
+
 function sessionId(): string {
   if (typeof window === 'undefined') return '';
   try {
@@ -72,7 +80,15 @@ function sessionId(): string {
         ? crypto.randomUUID()
         : String(Date.now()) + Math.random().toString(36).slice(2);
       window.sessionStorage.setItem(SESSION_KEY, sid);
+      // Mirror to a cookie so /api/leads can read the session SERVER-side.
+      // Every lead form on the site then bridges anonymous browsing to the
+      // contact for free — no form has to remember to send it, and forms we
+      // add later are covered automatically. Session-scoped (no expires).
+      writeSessionCookie(sid);
     }
+    // Re-assert on every read: a cookie can be cleared independently of
+    // sessionStorage, and a missing cookie silently costs us the bridge.
+    writeSessionCookie(sid);
     return sid;
   } catch { return ''; }
 }
