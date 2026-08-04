@@ -47,10 +47,26 @@ const statusLabel = (s: string) =>
   // cancelled / withdrawn / expired / temporarily-off-market are
   // indistinguishable to us. Printing "WITHDRAWN" asserts a seller action we
   // cannot verify. Say only what we actually know.
-  : s === 'Withdrawn'         ? 'No Longer Available'
+  : isOffMarket(s)            ? 'No Longer Available'
   : s
 
-const isOffMarket = (s: string) => s === 'Withdrawn'
+/**
+ * Every status meaning "not on the market".
+ *
+ * `Withdrawn` is the sentinel our reconcile writes when a listing disappears
+ * from the feed. The rest will rarely or never appear — we are licensed for
+ * five statuses only (see TRAPS.md) — but they DO turn up via legacy imports,
+ * manual edits, and would arrive wholesale if we ever get a VOW/back-office
+ * feed. Matching the category rather than the one string means none of them can
+ * render as a live listing.
+ */
+const OFF_MARKET_STATUSES = new Set([
+  'Withdrawn', 'Expired', 'Canceled', 'Cancelled', 'Hold',
+  'Terminated', 'CanceledRelisted', 'Delete', 'Incomplete',
+  'Temporarily Off Market', 'TempOffMarket', 'Withheld',
+])
+
+const isOffMarket = (s: string | null | undefined) => !!s && OFF_MARKET_STATUSES.has(s)
 
 const offMarketSince = (iso: string | null | undefined): string | null => {
   if (!iso) return null
