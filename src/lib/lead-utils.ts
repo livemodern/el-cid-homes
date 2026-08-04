@@ -28,6 +28,9 @@
 
 const VOWELS = 'aeiouy';
 
+/** Max points the phone alone may contribute — must stay below the 50 reject line. */
+const PHONE_MAX = 40;
+
 // Honorifics, generational suffixes and credentials — stripped before name
 // analysis so "Susan Stern, LCSW" isn't read as a vowel-less surname and
 // "Clayton Parsons III" isn't read as a repeated letter.
@@ -92,10 +95,9 @@ function nameWords(first?: string | null, last?: string | null): string[] {
 function longestConsonantRun(word: string): number {
   let best = 0;
   let cur = 0;
-  // Indexed, not for..of — iterating a string requires downlevelIteration,
-  // and mlg-site's tsconfig sets no `target` at all, so TypeScript defaults it
-  // to ES5 there. This exact file ships to every repo in the fleet unchanged
-  // (es2017 everywhere else), so it has to compile on the lowest of them.
+  // Indexed, not for..of — iterating a string requires downlevelIteration on
+  // the older tsconfig targets still in the fleet, and this file ships to all
+  // of them unchanged.
   for (let i = 0; i < word.length; i += 1) {
     const ch = word.charAt(i);
     if (/[a-z]/.test(ch) && !VOWELS.includes(ch)) {
@@ -127,7 +129,11 @@ export function botScore(data: {
     const core = word.toLowerCase().replace(/[^a-z]/g, '');
 
     if (word.length > 12 && !longWordScored) { longWordScored = true; add(30); }
-    if ((word.slice(1).match(/[A-Z]/g) || []).length >= 3) add(40);
+    // Random-case mash ("SjQUQrqalipgafyAplU"), NOT shouty typing. A word with
+    // no lowercase at all is someone holding shift — "JOHN MCKENNA" was
+    // rejected on 2026-08-01 for exactly this (40 + 40 = 80), a real buyer on
+    // mlg-site, lost silently. Requires a lowercase letter to fire.
+    if (/[a-z]/.test(word) && (word.slice(1).match(/[A-Z]/g) || []).length >= 3) add(40);
     if (/\d/.test(word)) add(40);
 
     // A Latin-script name with no vowel at all. Five letters or more is the
@@ -157,35 +163,51 @@ export function botScore(data: {
   }
 
   // ─── Phone ──────────────────────────────────────────────────────────
-  // NANP rules only apply to a number CLAIMING to be North American. A leading
-  // 0 or 1 is almost always a foreign national number pasted without its
-  // country code (Israeli 05x, Dutch 06x, Argentine 11x all appear in the real
-  // contact corpus) — an overseas buyer is exactly who we want, so those are
-  // exempted from the structural checks rather than rejected by them.
+  // A phone can only ever CORROBORATE — its total contribution is capped below
+  // the reject threshold, so an odd number can never reject on its own.
+  //
+  // Why (2026-08-04, found in lead_spam_log): 27 of 20,000 real clients scored
+  // 80 on phone signals ALONE — plausible name, real email, rejected for the
+  // number. Two populations, both real buyers:
+  //   • placeholder phones typed into a required field — 5555555555,
+  //     9999999999, 777-777-7777 (Amelia De Oliveira Gama, Félix J. González,
+  //     Elizabeth Hogan). Declining to hand over a phone is not fraud.
+  //   • foreign numbers entered without the trunk prefix or country code:
+  //     Oliver Amdrup-Chamby (+45 Denmark), a concordcollege.org.uk student on
+  //     a UK mobile, kevin@ncsc.nl, Mexican 449/55 numbers. The leading-0/1
+  //     exemption below misses these — they start 2-9, so they look NANP.
+  //     Overseas luxury buyers are the entire point of LiveModern.
+  //
+  // NANP structural rules only apply to a number CLAIMING to be North
+  // American; a leading 0 or 1 is a foreign national number and is exempt.
   const raw = String(data.phone ?? '').trim();
   if (raw) {
     let digits = raw.replace(/\D/g, '');
     if (digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
 
-    if (digits.length !== 10) {
-      add(20);
-    } else {
-      if (new Set(digits.split('')).size <= 2) add(40);
-      if ('01234567890'.includes(digits) || '09876543210'.includes(digits)) add(40);
+    let phonePoints = 0;
+    const addPhone = (points: number) => { phonePoints += points; };
 
-      if (!'01'.includes(digits[0])) {
+    if (digits.length !== 10) {
+      addPhone(20);
+    } else {
+      if (new Set(digits.split('')).size <= 2) addPhone(40);
+      if ('01234567890'.includes(digits) || '09876543210'.includes(digits)) addPhone(40);
+
+      const looksNanp = !'01'.includes(digits[0]);
+      if (looksNanp) {
         const npa = digits.slice(0, 3);
         const nxx = digits.slice(3, 6);
         // N11 (411, 611, 911…) is reserved for services — never an area code.
-        if (npa[1] === '1' && npa[2] === '1') add(40);
-        else if (!IN_SERVICE_NPA.has(npa)) add(40);
-        // A central-office code may not begin with 0 or 1 — this is what makes
-        // "772-114-2049" impossible rather than merely unfamiliar. Still only
-        // a partial: a Monterrey or Caracas number pasted without its country
-        // code lands in this shape too, and those are real buyers.
-        if (nxx[0] === '0' || nxx[0] === '1') add(40);
+        if (npa[1] === '1' && npa[2] === '1') addPhone(40);
+        else if (!IN_SERVICE_NPA.has(npa)) addPhone(40);
+        // A central-office code may not begin with 0 or 1 — what makes
+        // "772-114-2049" impossible rather than merely unfamiliar.
+        if (nxx[0] === '0' || nxx[0] === '1') addPhone(40);
       }
     }
+
+    add(Math.min(phonePoints, PHONE_MAX));
   }
 
   // ─── Message ────────────────────────────────────────────────────────
