@@ -30,6 +30,9 @@ const COL_LIST = [
   'vtour_unbranded:trestle_raw->>VirtualTourURLUnbranded',
   'vtour_branded:trestle_raw->>VirtualTourURLBranded',
   'security_deposit_raw:trestle_raw->>SecurityDeposit',
+  // Our off-market sentinel + when we detected it. The feed carries no
+  // off-market statuses, so 'Withdrawn' is ours and the date is ours.
+  'off_market_detected_at', 'off_market_from_status',
 ]
 const COLS = COL_LIST.join(',')
 

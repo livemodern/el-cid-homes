@@ -40,7 +40,25 @@ const STATUS_COLOR: Record<string, string> = {
   Pending: '#d97706', Closed: '#64748b', Withdrawn: '#64748b',
 }
 const statusLabel = (s: string) =>
-  s === 'ActiveUnderContract' ? 'Under Contract' : s === 'ComingSoon' ? 'Coming Soon' : s
+  s === 'ActiveUnderContract' ? 'Under Contract'
+  : s === 'ComingSoon'        ? 'Coming Soon'
+  // 'Withdrawn' is OUR sentinel for "left the on-market feed", not an MLS
+  // status — our licensed feed carries no off-market statuses at all, so
+  // cancelled / withdrawn / expired / temporarily-off-market are
+  // indistinguishable to us. Printing "WITHDRAWN" asserts a seller action we
+  // cannot verify. Say only what we actually know.
+  : s === 'Withdrawn'         ? 'No Longer Available'
+  : s
+
+const isOffMarket = (s: string) => s === 'Withdrawn'
+
+const offMarketSince = (iso: string | null | undefined): string | null => {
+  if (!iso) return null
+  const d = new Date(iso)
+  return Number.isFinite(d.getTime())
+    ? d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' })
+    : null
+}
 
 // `await (params as any)` works whether Next passes params as a plain object
 // (14) or a Promise (15) — awaiting a non-thenable returns it unchanged.
@@ -80,6 +98,18 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
     .replace(/\s+/g, ' ').slice(0, 180)
   const canonicalSlug = slugifyListing(l as any)
   const ogImage = l.image_urls?.[0] ? imgOpt(l.image_urls[0], 1200) : undefined
+  // Drop off-market listings from the index so they stop competing with live
+  // inventory in search results. follow stays true — the similar-listings
+  // links below are still worth crawling.
+  if (isOffMarket(l.status)) {
+    return {
+      title: `${title} — No Longer Available`,
+      description: desc,
+      alternates: { canonical: `/listings/${canonicalSlug}` },
+      robots: { index: false, follow: true },
+    }
+  }
+
   return {
     title,
     description: desc,
@@ -140,6 +170,8 @@ export default async function ListingPage({ params }: { params: any }) {
 
   const listingUrl = `${SITE_URL}/listings/${slugifyListing(l as any)}`
   const isAvailable = l.status === 'Active' || l.status === 'ComingSoon'
+  const offMarket = isOffMarket(l.status)
+  const offMarketDate = offMarketSince((l as any).off_market_detected_at)
 
   const jsonld = {
     '@context': 'https://schema.org',
@@ -267,6 +299,18 @@ export default async function ListingPage({ params }: { params: any }) {
         <div>
           <div className="pr">{money(l.list_price)}{isRent && <span style={{ fontSize: '.5em', fontWeight: 400 }}>/mo</span>}
             <span className="badge" style={{ background: STATUS_COLOR[l.status] || '#64748b' }}>{statusLabel(l.status).toUpperCase()}</span></div>
+          {offMarket && (
+            <div style={{
+              margin: '10px 0 0', padding: '12px 16px', borderRadius: 10,
+              background: '#fef3c7', border: '1px solid #f59e0b', color: '#78350f',
+              fontSize: 14, lineHeight: 1.5, fontWeight: 400,
+            }}>
+              <strong>This listing is no longer available.</strong>{' '}
+              It was removed from the MLS{offMarketDate ? ` on ${offMarketDate}` : ''}. The price
+              shown is the last one we recorded and may be out of date.{' '}
+              <a href="/for-sale" style={{ color: '#78350f', fontWeight: 600 }}>See current availability</a>.
+            </div>
+          )}
           <h1 className="ad">{l.unit_number ? `Unit ${l.unit_number} · ` : ''}{addr}</h1>
           <div className="specrow">
             <span><b>{l.beds ?? '—'}</b>beds</span><span><b>{l.baths ?? '—'}</b>baths</span>
