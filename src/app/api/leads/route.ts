@@ -178,21 +178,31 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Generic session back-stitch (Patrick 2026-07-30). The block above only
-        // fires for REGISTRATIONS and resolves the session through
-        // registrations.user_id - so a plain inquiry, where the person never makes
-        // an account, adopted nothing. The form now hands us its session id
-        // directly, claiming everything this browser looked at BEFORE the form.
-        if (contactId && !isRegistration) {
-          const sid = typeof body?.sessionId === 'string' ? body.sessionId.trim() : '';
-          if (sid) {
-            try {
-              const sbStitch = getSupabase();
-              await sbStitch.from('site_events').update({ contact_id: contactId })
-                .eq('session_id', sid).is('contact_id', null);
-            } catch (e) {
-              console.warn('session back-stitch failed (non-fatal):', e);
-            }
+        // Session back-stitch — claim everything this browser looked at BEFORE
+        // the form, INLINE so the agent sees it the moment the lead lands.
+        //
+        // The hourly backfill-site-events cron also does this off
+        // leads.session_id, and remains the safety net that repairs history and
+        // catches anything this path misses. But an agent calling a fresh
+        // registration inside the first minute is the whole point of speed-to-
+        // lead, and "their browsing shows up within the hour" is the wrong
+        // answer at that moment.
+        //
+        // Runs for registrations too. It used to skip them on the assumption the
+        // registrations.user_id block above covered it — that block only resolves
+        // sessions the user was ALREADY signed in for, so a brand-new registrant's
+        // pre-signup browsing (the interesting part) fell through the gap.
+        if (contactId && sessionId) {
+          try {
+            const sbStitch = getSupabase();
+            const { error: stitchErr } = await sbStitch
+              .from('site_events')
+              .update({ contact_id: contactId })
+              .eq('session_id', sessionId)
+              .is('contact_id', null);
+            if (stitchErr) console.warn('session back-stitch:', stitchErr.message);
+          } catch (e) {
+            console.warn('session back-stitch failed (non-fatal):', e);
           }
         }
       } catch (e) {
