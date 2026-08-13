@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { listingHref } from '@/lib/listing-slug';
 import { imgOpt, listingImageAlt } from '@/lib/img';
 import CardPhotos from '@/components/CardPhotos';
-import { statusBucket, statusLabel, isMarketable } from '@/lib/listing-status';
+import { statusBucket, isMarketable, badgeText, badgeColor } from '@/lib/listing-status';
 const TEAL='#00B2CC',NAVY='#0D173B',SLATE='#64748b';
 const STATUS_COLORS: Record<string,string>={Active:'#22c55e',Pending:'#f59e0b',Closed:'#6b7280'};
 const DISPLAY="'Plus Jakarta Sans',sans-serif",BODY="'Poppins',sans-serif";
@@ -124,7 +124,7 @@ export default function ForSaleGrid({ initialListings, initialError }: { initial
               onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform='';(e.currentTarget as HTMLElement).style.boxShadow='0 1px 4px rgba(0,0,0,0.06)';}}>
               <div style={{position:'relative',height:220,background:'#e2e8f0',overflow:'hidden'}}>
                 {l.image_urls?.[0]?<CardPhotos urls={l.image_urls} total={(l as any).photos_total ?? l.image_urls.length} alt={listingImageAlt(l, 0)} width={640} widths={[400, 640, 960]}/>:<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',fontSize:40}}>🏙️</div>}
-                <span style={{position:'absolute',top:12,left:12,background:(l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : STATUS_COLORS[statusBucket(l.status)]||'#94a3b8',color:'#fff',padding:'4px 10px',borderRadius:6,fontSize:11,fontWeight:700,textTransform:'uppercase',fontFamily:DISPLAY}}>{l.days_on_market != null && l.days_on_market <= 10 ? 'New' : statusLabel(l.status)}</span>
+                <span style={{position:'absolute',top:12,left:12,background:badgeColor(l.status, l.days_on_market),color:'#fff',padding:'4px 10px',borderRadius:6,fontSize:11,fontWeight:700,textTransform:'uppercase',fontFamily:DISPLAY}}>{badgeText(l.status, l.days_on_market)}</span>
 
               </div>
               <div style={{padding:'16px 20px 18px'}}>

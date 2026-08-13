@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { listingHref } from '@/lib/listing-slug';
 import { imgOpt, listingImageAlt } from '@/lib/img';
 import CardPhotos from '@/components/CardPhotos';
-import { statusBucket, rentStatusLabel, isMarketable } from '@/lib/listing-status';
+import { statusBucket, isMarketable, rentBadgeText, rentBadgeColor } from '@/lib/listing-status';
 import BuildingAlerts from './BuildingAlerts';
 import BuildingAlertsButton from './BuildingAlertsButton';
 import { BUILDING_NAME, ALERT_FILTER, ALERT_KIND, ALERT_SOURCE } from '@/lib/building';
@@ -157,8 +157,8 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
                     ? <CardPhotos urls={l.image_urls} total={(l as any).photos_total ?? l.image_urls.length} alt={listingImageAlt(l, 0)} width={640} widths={[400, 640, 960]} />
                     : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 40 }}>🏙️</div>}
                   {/* Status badge — show "Available" instead of "Active", "Leased" instead of "Closed" */}
-                  <span style={{ position: 'absolute', top: 12, left: 12, background: (l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : statusBucket(l.status) === 'Active' ? '#15803d' : '#6b7280', color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', fontFamily: DISPLAY }}>
-                    {(l.days_on_market != null && l.days_on_market <= 10) ? 'New' : rentStatusLabel(l.status)}
+                  <span style={{ position: 'absolute', top: 12, left: 12, background: rentBadgeColor(l.status, l.days_on_market), color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', fontFamily: DISPLAY }}>
+                    {rentBadgeText(l.status, l.days_on_market)}
                   </span>
                 </div>
 
