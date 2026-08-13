@@ -32,6 +32,13 @@ async function run({ type, status, includeRaw, closedCutoff }: Params) {
     .order('list_price', { ascending: false })
     .limit(300)
 
+  // Off-market rows never leave the server. 'Withdrawn' is OUR sentinel (the
+  // feed carries no off-market statuses — records just vanish), and a handful
+  // of pre-sentinel rows carry 'Expired'. Excluding them here rather than in
+  // the component means they are not in the SSR payload either, so a listing
+  // nobody can buy never ships to the browser with a live-looking price.
+  q = q.not('status', 'in', '("Withdrawn","Expired","Canceled","Cancelled","Hold","Terminated","Incomplete","Delete","Deleted")')
+
   if (type === 'rent') q = q.lt('list_price', 50000)
   if (type === 'sale') q = q.gte('list_price', 50000)
   if (status) q = q.eq('status', status)
@@ -52,9 +59,9 @@ async function run({ type, status, includeRaw, closedCutoff }: Params) {
 // Key bumped :grid → :grid-v2 (2026-07-02) to flush pre-trim cached
 // entries after the card-payload photo cap landed — otherwise stale
 // full-gallery payloads serve for up to an hour post-deploy.
-const cached = unstable_cache(run, ['listings:el-cid:grid-v2'], {
+const cached = unstable_cache(run, ['listings:el-cid:grid-v4'], {
   tags: [TAGS.LISTINGS_TCP],
-  revalidate: 3600,
+  revalidate: 60,
 })
 
 export async function getGridListings(
