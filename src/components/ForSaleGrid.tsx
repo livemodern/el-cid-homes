@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { listingHref } from '@/lib/listing-slug';
 import { imgOpt, listingImageAlt } from '@/lib/img';
 import CardPhotos from '@/components/CardPhotos';
+import { statusBucket, statusLabel, isMarketable } from '@/lib/listing-status';
 const TEAL='#00B2CC',NAVY='#0D173B',SLATE='#64748b';
 const STATUS_COLORS: Record<string,string>={Active:'#22c55e',Pending:'#f59e0b',Closed:'#6b7280'};
 const DISPLAY="'Plus Jakarta Sans',sans-serif",BODY="'Poppins',sans-serif";
@@ -41,8 +42,12 @@ export default function ForSaleGrid({ initialListings, initialError }: { initial
     try { sessionStorage.setItem('mlg_forsale_state', JSON.stringify({sf,sort,minBeds})); } catch{}
   },[sf,sort,minBeds]);
 
-  const counts={All:listings.length,Active:listings.filter(l=>l.status==='Active').length,Pending:listings.filter(l=>l.status==='Pending').length,Closed:listings.filter(l=>l.status==='Closed').length};
-  let filtered=sf==='All'?listings:listings.filter(l=>l.status===sf);
+  // Bucket rather than string-match: ComingSoon counts as Active, ActiveUnderContract
+  // as Pending, and off-market rows (our Withdrawn sentinel, Expired, Canceled) never
+  // show — not even under "All".
+  const marketable=listings.filter(l=>isMarketable(l.status));
+  const counts={All:marketable.length,Active:marketable.filter(l=>statusBucket(l.status)==='Active').length,Pending:marketable.filter(l=>statusBucket(l.status)==='Pending').length,Closed:marketable.filter(l=>statusBucket(l.status)==='Closed').length};
+  let filtered=sf==='All'?marketable:marketable.filter(l=>statusBucket(l.status)===sf);
   if(minBeds>0)filtered=filtered.filter(l=>(l.beds||0)>=minBeds);
   filtered=[...filtered].sort((a,b)=>sort==='price_asc'?(a.list_price||0)-(b.list_price||0):sort==='dom_asc'?(a.days_on_market||999)-(b.days_on_market||999):(b.list_price||0)-(a.list_price||0));
   return(
@@ -119,7 +124,7 @@ export default function ForSaleGrid({ initialListings, initialError }: { initial
               onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform='';(e.currentTarget as HTMLElement).style.boxShadow='0 1px 4px rgba(0,0,0,0.06)';}}>
               <div style={{position:'relative',height:220,background:'#e2e8f0',overflow:'hidden'}}>
                 {l.image_urls?.[0]?<CardPhotos urls={l.image_urls} total={(l as any).photos_total ?? l.image_urls.length} alt={listingImageAlt(l, 0)} width={640} widths={[400, 640, 960]}/>:<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',fontSize:40}}>🏙️</div>}
-                <span style={{position:'absolute',top:12,left:12,background:(l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : STATUS_COLORS[l.status]||'#94a3b8',color:'#fff',padding:'4px 10px',borderRadius:6,fontSize:11,fontWeight:700,textTransform:'uppercase',fontFamily:DISPLAY}}>{l.days_on_market != null && l.days_on_market <= 10 ? 'New' : l.status}</span>
+                <span style={{position:'absolute',top:12,left:12,background:(l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : STATUS_COLORS[statusBucket(l.status)]||'#94a3b8',color:'#fff',padding:'4px 10px',borderRadius:6,fontSize:11,fontWeight:700,textTransform:'uppercase',fontFamily:DISPLAY}}>{l.days_on_market != null && l.days_on_market <= 10 ? 'New' : statusLabel(l.status)}</span>
 
               </div>
               <div style={{padding:'16px 20px 18px'}}>
@@ -131,7 +136,7 @@ export default function ForSaleGrid({ initialListings, initialError }: { initial
                   {l.sqft&&<span><strong>{l.sqft.toLocaleString()}</strong> sqft</span>}
                 </div>
                 {l.hoa_fee&&<div style={{marginTop:6,fontSize:12,color:'#94a3b8',fontFamily:BODY}}>HOA: ${l.hoa_fee.toLocaleString()}/mo</div>}
-                {l.days_on_market!=null&&l.days_on_market>7&&l.status==='Active'&&<div style={{fontSize:12,color:'#94a3b8',fontFamily:BODY}}>{l.days_on_market} days on market</div>}
+                {l.days_on_market!=null&&l.days_on_market>7&&statusBucket(l.status)==='Active'&&<div style={{fontSize:12,color:'#94a3b8',fontFamily:BODY}}>{l.days_on_market} days on market</div>}
                 <div style={{marginTop:14,paddingTop:14,borderTop:'1px solid #f1f5f9',display:'flex',justifyContent:'space-between'}}>
                   <span style={{fontSize:10,color:'#94a3b8',fontFamily:BODY}}>MLS# {l.listing_id}</span>
                   <span style={{fontSize:11,color:TEAL,fontWeight:600,fontFamily:DISPLAY}}>View Details →</span>

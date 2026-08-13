@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { listingHref } from '@/lib/listing-slug';
+import { statusBucket, statusLabel } from '@/lib/listing-status';
 import { listingImageAlt } from '@/lib/img';
 import CardPhotos from '@/components/CardPhotos';
 
@@ -31,7 +32,7 @@ export default function LiveListings() {
       .then(({ listings }) => {
         if (!listings?.length) { setLoading(false); return; }
         // Active with photos only
-        const active = listings.filter((l: any) => l.status === 'Active' && (l.image_urls?.length || 0) > 0);
+        const active = listings.filter((l: any) => statusBucket(l.status) === 'Active' && (l.image_urls?.length || 0) > 0);
         // Sort: MLG/Compass listings first, then most photos, then highest price
         const sorted = [...active].sort((a: any, b: any) => {
           const aOurs = (a.list_office_name || '').toLowerCase().includes('compass') ? 1 : 0;
@@ -92,9 +93,9 @@ export default function LiveListings() {
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 40 }}>🏙️</div>
                   )}
-                  <span style={{ position: 'absolute', top: 12, left: 12, background: STATUS_COLORS[l.status] || '#94a3b8',
+                  <span style={{ position: 'absolute', top: 12, left: 12, background: STATUS_COLORS[statusBucket(l.status)] || '#94a3b8',
                     color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700,
-                    textTransform: 'uppercase', fontFamily: DISPLAY }}>{l.status}</span>
+                    textTransform: 'uppercase', fontFamily: DISPLAY }}>{statusLabel(l.status)}</span>
                   {(l.list_office_name || '').toLowerCase().includes('compass') && (
                     <span style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.72)',
                       color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700,

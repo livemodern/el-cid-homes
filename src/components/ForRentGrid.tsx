@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { listingHref } from '@/lib/listing-slug';
 import { imgOpt, listingImageAlt } from '@/lib/img';
 import CardPhotos from '@/components/CardPhotos';
+import { statusBucket, rentStatusLabel, isMarketable } from '@/lib/listing-status';
 import BuildingAlerts from './BuildingAlerts';
 import BuildingAlertsButton from './BuildingAlertsButton';
 import { BUILDING_NAME, ALERT_FILTER, ALERT_KIND, ALERT_SOURCE } from '@/lib/building';
@@ -25,7 +26,7 @@ const RENT_TABS = ['Available', 'Leased', 'All'] as const;
 type RentTab = typeof RENT_TABS[number];
 
 // Map display tab → DB status value
-const TAB_TO_STATUS: Record<RentTab, string | null> = {
+const TAB_TO_STATUS: Record<RentTab, 'Active' | 'Closed' | null> = {
   Available: 'Active',
   Leased:    'Closed',
   All:       null,
@@ -51,14 +52,17 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
   const [sort,       setSort]       = useState('dom_asc');
   const [minBeds,    setMinBeds]    = useState(0);
 
+  // Bucket rather than string-match — a ComingSoon rental is Available, not a
+  // ghost that only surfaces under "All". Off-market rows never render.
+  const marketable = listings.filter(l => isMarketable(l.status));
   const counts = {
-    Available: listings.filter(l => l.status === 'Active').length,
-    Leased:    listings.filter(l => l.status === 'Closed').length,
-    All:       listings.length,
+    Available: marketable.filter(l => statusBucket(l.status) === 'Active').length,
+    Leased:    marketable.filter(l => statusBucket(l.status) === 'Closed').length,
+    All:       marketable.length,
   };
 
   const dbStatus = TAB_TO_STATUS[tab];
-  let filtered = dbStatus ? listings.filter(l => l.status === dbStatus) : listings;
+  let filtered = dbStatus ? marketable.filter(l => statusBucket(l.status) === dbStatus) : marketable;
   if (minBeds > 0) filtered = filtered.filter(l => (l.beds || 0) >= minBeds);
   filtered = [...filtered].sort((a, b) =>
     sort === 'price_asc'  ? (a.list_price || 0) - (b.list_price || 0) :
@@ -153,8 +157,8 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
                     ? <CardPhotos urls={l.image_urls} total={(l as any).photos_total ?? l.image_urls.length} alt={listingImageAlt(l, 0)} width={640} widths={[400, 640, 960]} />
                     : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 40 }}>🏙️</div>}
                   {/* Status badge — show "Available" instead of "Active", "Leased" instead of "Closed" */}
-                  <span style={{ position: 'absolute', top: 12, left: 12, background: (l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : l.status === 'Active' ? '#15803d' : '#6b7280', color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', fontFamily: DISPLAY }}>
-                    {(l.days_on_market != null && l.days_on_market <= 10) ? 'New' : l.status === 'Active' ? 'Available' : l.status === 'Closed' ? 'Leased' : l.status}
+                  <span style={{ position: 'absolute', top: 12, left: 12, background: (l.days_on_market != null && l.days_on_market <= 10) ? '#00B2CC' : statusBucket(l.status) === 'Active' ? '#15803d' : '#6b7280', color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', fontFamily: DISPLAY }}>
+                    {(l.days_on_market != null && l.days_on_market <= 10) ? 'New' : rentStatusLabel(l.status)}
                   </span>
                 </div>
 
@@ -167,7 +171,7 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
                     {l.baths && <span><strong>{l.baths}</strong> ba</span>}
                     {l.sqft  && <span><strong>{l.sqft.toLocaleString()}</strong> sqft</span>}
                   </div>
-                  {l.status === 'Active' && l.days_on_market != null && (
+                  {statusBucket(l.status) === 'Active' && l.days_on_market != null && (
                     <div style={{ marginTop: 6, fontSize: 12, color: '#94a3b8', fontFamily: BODY }}>{l.days_on_market} days listed</div>
                   )}
                   <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

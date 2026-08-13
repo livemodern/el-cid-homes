@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import HomeFloorPlans from '@/components/HomeFloorPlans';
 import { listingHref } from '@/lib/listing-slug';
+import { statusLabel } from '@/lib/listing-status';
 import { listingImageProps, imgOpt, imgSrcSet, HERO_WIDTHS, HERO_SIZES } from '@/lib/img';
 
 //  LiveModern brand: Teal #00B2CC · Navy #0D173B · Ink #1A1A1A
@@ -210,7 +211,7 @@ export default function HomeContent({ cfg, avgPrice, forSaleCount, featured, gat
                   {l.image_urls?.[0]
                     ? <img {...listingImageProps(l, l.image_urls[0], 0, { width: 640, widths: [400, 640, 960] })} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--teal-d)' }}>Photo via MLS</div>}
-                  {l.status && <div style={{ position: 'absolute', top: 12, left: 12, background: '#15803d', color: '#fff', padding: '4px 11px', fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>Active</div>}
+                  {l.status && <div style={{ position: 'absolute', top: 12, left: 12, background: '#15803d', color: '#fff', padding: '4px 11px', fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>{statusLabel(l.status)}</div>}
                 </div>
                 <div style={{ padding: 22 }}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 22, fontWeight: 800, color: 'var(--navy)', marginBottom: 3 }}>{l.list_price ? '$' + l.list_price.toLocaleString() : '\u2014'}</div>

@@ -1,4 +1,5 @@
 import { getGridListings } from '@/lib/listings'
+import { statusBucket, isMarketable } from '@/lib/listing-status'
 import { getSiteConfig } from '@/lib/site-config'
 import { imgSrcSet, HERO_WIDTHS, HERO_SIZES } from '@/lib/img'
 import HomeContent from '@/components/HomeContent'
@@ -10,6 +11,7 @@ export const revalidate = 3600
 
 function computeAvgPrice(listings: any[]): string {
   const prices = listings
+    .filter(l => isMarketable(l.status))
     .map(l => (l.status === 'Closed' ? (l.close_price || l.list_price) : l.list_price))
     .filter((p: number) => p && p >= 50000)
   if (!prices.length) return '$650K'
@@ -19,11 +21,11 @@ function computeAvgPrice(listings: any[]): string {
 
 // Active listings on the market right now — drives the __forsale__ stat token.
 function computeForSale(listings: any[]): number {
-  return listings.filter(l => l.status === 'Active').length
+  return listings.filter(l => statusBucket(l.status) === 'Active').length
 }
 
 function computeFeatured(listings: any[]): any[] {
-  const active = listings.filter(l => l.status === 'Active' && (l.image_urls?.length || 0) > 0)
+  const active = listings.filter(l => statusBucket(l.status) === 'Active' && (l.image_urls?.length || 0) > 0)
   const sorted = [...active].sort((a: any, b: any) => {
     const aC = (a.list_office_name || '').toLowerCase().includes('compass') ? 1 : 0
     const bC = (b.list_office_name || '').toLowerCase().includes('compass') ? 1 : 0
