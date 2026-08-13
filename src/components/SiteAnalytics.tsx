@@ -30,7 +30,6 @@
 
 import Script from 'next/script'
 import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
-import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export default function SiteAnalytics() {
   const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
@@ -39,9 +38,15 @@ export default function SiteAnalytics() {
 
   return (
     <>
-      {/* Vercel-native — no IDs needed. */}
+      {/* Vercel Web Analytics — pageviews/referrers, billed per EVENT across
+          the whole team, so adding sites doesn't add a base fee.
+          Speed Insights deliberately NOT here: it is $10 per project per
+          month on Pro, billed per project, and the $20 monthly team credit
+          does NOT cover add-on subscriptions. Across the mini-site fleet that
+          is real recurring money for Core Web Vitals nobody asked for.
+          Removed 2026-08-12. Don't re-add it fleet-wide without deciding to
+          pay for it. */}
       <VercelAnalytics />
-      <SpeedInsights />
 
       {/* Google Tag Manager — head script + noscript fallback. */}
       {GTM_ID && (

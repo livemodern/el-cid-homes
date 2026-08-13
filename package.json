@@ -15,7 +15,6 @@
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.45.0",
     "@vercel/analytics": "^2.0.1",
-    "@vercel/speed-insights": "^2.0.0",
     "dotenv": "^16.4.5",
     "lucide-react": "^0.383.0",
     "mapbox-gl": "^3.24.0",
