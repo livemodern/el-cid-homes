@@ -1,1 +1,4 @@
-{ "ownSlug": "el-cid-homes" }
+{
+  "ownSlug": "el-cid-homes",
+  "scanSlugLiterals": true
+}

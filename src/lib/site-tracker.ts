@@ -14,7 +14,7 @@
 
 'use client';
 
-const SITE_SLUG = process.env.NEXT_PUBLIC_SITE_SLUG || 'mlg-mini';
+const SITE_SLUG = process.env.NEXT_PUBLIC_SITE_SLUG || 'el-cid-homes';
 const COOKIE_UID = 'mlg_uid';
 const COOKIE_UEM = 'mlg_uem';
 const COOKIE_ATTR = 'mlg_attr';

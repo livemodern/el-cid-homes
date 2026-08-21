@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         lastName:  body.lastName,
         email:     body.email,
         phone:     body.phone,
-        siteSlug:  process.env.NEXT_PUBLIC_SITE_SLUG || 'el-cid',
+        siteSlug:  process.env.NEXT_PUBLIC_SITE_SLUG || 'el-cid-homes',
       }),
       cache: 'no-store',
       signal: controller.signal,

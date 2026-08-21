@@ -16,7 +16,7 @@ export const runtime = 'nodejs';
 
 const SB_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
-const SITE_SLUG = process.env.NEXT_PUBLIC_SITE_SLUG ?? 'mlg-mini';
+const SITE_SLUG = process.env.NEXT_PUBLIC_SITE_SLUG ?? 'el-cid-homes';
 
 const ALLOWED_EVENT_TYPES = new Set([
   'pageview', 'listing_view', 'search', 'save_listing', 'cta_click',

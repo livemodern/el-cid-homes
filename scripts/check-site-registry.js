@@ -217,6 +217,63 @@ fetchSites()
       }
     }
 
+    // 1b. Scan the SOURCE for slug literals that are not registered sites.
+    //
+    // WHY THIS EXISTS, SEPARATE FROM ownSlug: ownSlug validates the slug the
+    // config DECLARES. It says nothing about slug literals sitting in the code.
+    // Found 2026-08-21: seven mini-sites carried
+    //     process.env.NEXT_PUBLIC_SITE_SLUG ?? 'mlg-mini'
+    // in api/track/route.ts and lib/site-tracker.ts. `mlg-mini` is not a site.
+    // 7,429 rows of site_events were already attributed to it. A gate checking
+    // only ownSlug reported ✔ while the tracker wrote a slug that does not
+    // exist. Same shape as the destructure defaults that wrote the retired
+    // 'mlg-search' on four repos that same morning.
+    if (cfg.scanSlugLiterals) {
+      const SKIP = new Set(['node_modules', '.next', '.git', 'dist', 'build', 'out', 'public'])
+      const allowed = new Set([...all.keys(), ...(cfg.allowSlugLiterals || []).map(s => s.toLowerCase())])
+      const PATTERNS = [
+        /NEXT_PUBLIC_SITE_SLUG\s*(?:\|\||\?\?)\s*['"]([A-Za-z0-9_-]+)['"]/g,
+        /\bsite_slug\s*=\s*['"]([A-Za-z0-9_-]+)['"]/g,
+        /\bsiteSlug\s*[=:]\s*['"]([A-Za-z0-9_-]+)['"]/g,
+      ]
+      const bad = new Map()
+      const walk = dir => {
+        let ents = []
+        try { ents = fs.readdirSync(dir, { withFileTypes: true }) } catch { return }
+        for (const e of ents) {
+          if (SKIP.has(e.name)) continue
+          const p = path.join(dir, e.name)
+          if (e.isDirectory()) { walk(p); continue }
+          if (!/\.(ts|tsx|js|jsx|mjs)$/.test(e.name)) continue
+          let src = ''
+          try { src = fs.readFileSync(p, 'utf8') } catch { continue }
+          src = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+          for (const re of PATTERNS) {
+            re.lastIndex = 0
+            for (const mm of src.matchAll(re)) {
+              const lit = mm[1].toLowerCase()
+              if (allowed.has(lit)) continue
+              const rel = path.relative(ROOT, p)
+              if (!bad.has(lit)) bad.set(lit, [])
+              if (bad.get(lit).length < 6) bad.get(lit).push(rel)
+            }
+          }
+        }
+      }
+      walk(ROOT)
+      if (bad.size) {
+        const lines = ['\x1b[1mUnregistered slug literals in source\x1b[0m']
+        for (const [lit, files] of bad) {
+          lines.push(`\n  '${lit}' is not in \`sites\` — used in ${files.length}${files.length >= 6 ? '+' : ''} file(s):`)
+          for (const f of files) lines.push(`      ${f}`)
+        }
+        lines.push('\n  Rows written with these slugs resolve to nothing. Set the real slug as the')
+        lines.push('  fallback, or add it to `sites`. If a literal is deliberate and not a site slug,')
+        lines.push('  list it under "allowSlugLiterals" in site-registry.config.json.')
+        problems.push(lines.join('\n'))
+      }
+    }
+
     // 2. Every declared map must cover every registered site, with right domains.
     for (const m of maps) {
       const inFile = parseMap(m)
