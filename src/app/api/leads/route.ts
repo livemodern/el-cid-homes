@@ -80,6 +80,49 @@ export async function POST(req: NextRequest) {
       try { sessionId = cookies().get('mlg_sid')?.value?.trim() || null; } catch { /* not in a request scope */ }
     }
 
+    // Attribution — the tracker persists the visitor's acquisition touch
+    // (UTM / click IDs / referrer / landing path) in the first-party
+    // `mlg_attr` cookie, the same server-readable bridge `mlg_sid` uses.
+    // Reading it here stamps EVERY lead form on the site with zero per-form
+    // wiring, and mlg-admin's routing carry-over then copies these columns
+    // onto the contact (it reads the latest leads row by email).
+    // attribution_campaign carries the Google Ads numeric campaign id
+    // (gad_campaignid) — the join key against marketing_spend.campaign_id.
+    const truncS = (v: unknown, n = 255): string | null =>
+      typeof v === 'string' && v.trim() ? v.trim().slice(0, n) : null;
+    let attr: Record<string, unknown> = {};
+    try {
+      const rawAttr = cookies().get('mlg_attr')?.value;
+      if (rawAttr) attr = JSON.parse(rawAttr) as Record<string, unknown>;
+    } catch { /* absent/corrupt cookie or non-request scope — stays empty */ }
+    if (body?.attribution && typeof body.attribution === 'object') {
+      // Explicit client payload wins over the cookie (future-proofing —
+      // mirrors mlg-site's snapshotForSubmit contract).
+      attr = { ...attr, ...(body.attribution as Record<string, unknown>) };
+    }
+    const ftRaw = truncS(attr.ft ?? attr.first_touch_at, 40);
+    const ua = req.headers.get('user-agent') || '';
+    const lpPath = truncS(attr.lp ?? attr.landing_page_path, 1000);
+    const host = req.headers.get('host');
+    const attributionRow = {
+      attribution_source:   truncS(attr.source),
+      attribution_medium:   truncS(attr.medium),
+      attribution_campaign: truncS(attr.campaign),
+      attribution_content:  truncS(attr.content),
+      attribution_term:     truncS(attr.term),
+      gclid:                truncS(attr.gclid),
+      fbclid:               truncS(attr.fbclid),
+      msclkid:              truncS(attr.msclkid),
+      landing_page_path:    lpPath,
+      landing_page:         lpPath && host ? `https://${host}${lpPath}`.slice(0, 1000) : null,
+      referrer_domain:      truncS(attr.ref ?? attr.referrer_domain),
+      // Guard the timestamptz column — a corrupt cookie value must never
+      // cost us the lead insert.
+      first_touch_at:       ftRaw && !Number.isNaN(Date.parse(ftRaw)) ? ftRaw : null,
+      device_type:          /iPad|Tablet|Android(?!.*Mobile)/i.test(ua) ? 'tablet'
+                            : /Mobi|iPhone|Android/i.test(ua) ? 'mobile' : 'desktop',
+    };
+
     // 1. Save to Supabase leads table
     const { data: lead } = await getSupabase().from('leads').insert({
       first_name:      first || null,
@@ -92,6 +135,7 @@ export async function POST(req: NextRequest) {
       mls_id:          mls_id || null,
       listing_address: listing || null,
       session_id:      sessionId,
+      ...attributionRow,
     }).select().maybeSingle();
 
     // userType lowercased becomes a FUB tag (mirrors mlg-site behavior).

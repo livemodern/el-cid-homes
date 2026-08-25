@@ -28,7 +28,12 @@ export type SiteEventType =
 
 type Attribution = {
   source: string | null; medium: string | null; campaign: string | null;
+  content?: string | null; term?: string | null;
   gclid: string | null; fbclid: string | null;
+  msclkid?: string | null; gbraid?: string | null; wbraid?: string | null;
+  lp?: string | null;   // landing page path+query at touch time
+  ref?: string | null;  // external referrer hostname
+  ft?: string | null;   // first-touch ISO timestamp (survives overwrites)
 };
 
 function readCookie(name: string): string | null {
@@ -104,31 +109,69 @@ function deviceType(): string {
   return 'desktop';
 }
 
-/** First touch of a session wins — a later organic visit must not overwrite
- *  the paid click that actually earned the lead. */
+/** Persist the visitor's acquisition touch. A page carrying new UTM/click-id
+ *  data OVERWRITES the stored touch (last meaningful touch — matches GA4
+ *  "last non-direct click" and mlg-site's model: a fresh paid click must not
+ *  be swallowed by a stale '(direct)' cookie). A bare page load never
+ *  overwrites. `ft` (first-touch time) survives every overwrite.
+ *
+ *  Google Ads auto-tagging appends gclid + gad_campaignid but NO utm params,
+ *  so the campaign ID — the join key against marketing_spend — only exists
+ *  via gad_campaignid. iOS-privacy ad clicks carry gbraid/wbraid INSTEAD of
+ *  gclid; both are equally conclusive proof of a paid click. */
 export function captureAttribution(): void {
   if (typeof window === 'undefined') return;
-  if (readCookie(COOKIE_ATTR)) return;
   const p = new URLSearchParams(window.location.search);
-  const ref = document.referrer || '';
-  let source = p.get('utm_source');
-  let medium = p.get('utm_medium');
+  const g = (k: string) => p.get(k) || null;
+
+  const gclid = g('gclid'), gbraid = g('gbraid'), wbraid = g('wbraid');
+  const msclkid = g('msclkid'), fbclid = g('fbclid');
+  const gadCampaign = g('gad_campaignid');
+  const googleAdsClick = !!(gclid || gbraid || wbraid || g('gad_source') || gadCampaign);
+  const hasParamData = !!(g('utm_source') || g('utm_medium') || g('utm_campaign') ||
+    g('utm_content') || g('utm_term') || gclid || gbraid || wbraid || msclkid || fbclid || googleAdsClick);
+
+  const prevRaw = readCookie(COOKIE_ATTR);
+  let prev: Attribution | null = null;
+  if (prevRaw) { try { prev = JSON.parse(prevRaw) as Attribution; } catch { /* corrupt */ } }
+
+  // Nothing new on this URL → keep whatever we have; only seed a first
+  // touch (referrer or direct) when no cookie exists yet.
+  if (!hasParamData && prev) return;
+
+  let externalRef = '';
+  try {
+    const r = document.referrer ? new URL(document.referrer) : null;
+    if (r && r.host !== window.location.host) externalRef = r.hostname.replace(/^www\./, '');
+  } catch { /* bad referrer */ }
+
+  let source = g('utm_source');
+  let medium = g('utm_medium');
+  let campaign = g('utm_campaign');
+  if (!medium) {
+    if (googleAdsClick) { medium = 'cpc'; source = source || 'google'; campaign = campaign || gadCampaign; }
+    else if (msclkid)   { medium = 'cpc'; source = source || 'bing'; }
+    else if (fbclid)    { medium = 'paid-social'; source = source || 'facebook'; }
+  }
   if (!source) {
-    if (p.get('gclid')) { source = 'google'; medium = medium || 'cpc'; }
-    else if (p.get('fbclid')) { source = 'facebook'; medium = medium || 'paid-social'; }
-    else if (ref) { try { source = new URL(ref).hostname.replace(/^www\./, ''); medium = medium || 'referral'; } catch { /* bad referrer */ } }
+    if (externalRef) { source = externalRef; medium = medium || 'referral'; }
     else { source = '(direct)'; medium = medium || '(none)'; }
   }
+
   const attr: Attribution = {
-    source, medium: medium ?? null, campaign: p.get('utm_campaign'),
-    gclid: p.get('gclid'), fbclid: p.get('fbclid'),
+    source, medium: medium ?? null, campaign,
+    content: g('utm_content'), term: g('utm_term'),
+    gclid, fbclid, msclkid, gbraid, wbraid,
+    lp: (window.location.pathname + window.location.search).slice(0, 300),
+    ref: externalRef || (prev?.ref ?? null),
+    ft: prev?.ft || new Date().toISOString(),
   };
   try { writeCookie(COOKIE_ATTR, JSON.stringify(attr)); } catch { /* cookies off */ }
 }
 function currentAttribution(): Attribution {
   const raw = readCookie(COOKIE_ATTR);
   if (raw) { try { return JSON.parse(raw) as Attribution; } catch { /* corrupt */ } }
-  return { source: null, medium: null, campaign: null, gclid: null, fbclid: null };
+  return { source: null, medium: null, campaign: null, gclid: null, fbclid: null, msclkid: null, gbraid: null, wbraid: null };
 }
 
 let queue: Record<string, unknown>[] = [];
