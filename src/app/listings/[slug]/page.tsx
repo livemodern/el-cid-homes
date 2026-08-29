@@ -30,8 +30,8 @@ const FEATURED_AGENT = {
   name: 'Patrick Lafferty',
   first: 'Patrick',
   title: 'Founding Agent',
-  phone: '(561) 603-4329',
-  tel: '5616034329',
+  phone: '(561) 363-0202',
+  tel: '5613630202',
   photo_url: 'https://ezcikavnfchqaenweygw.supabase.co/storage/v1/object/public/agent-photos/a34fe83e-10cd-4a3f-9f4a-a3e58e358069/headshot-1781048024794.jpg',
 }
 

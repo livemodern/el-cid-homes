@@ -75,7 +75,7 @@ const HOUSE_DEFAULT_AGENT_NAME = 'Jonathan Santiago'
 
 async function loadHouseDefaultAgent(sb: any) {
   const { data } = await sb.from('agents')
-    .select('name, title, photo_url, cell_phone, office_phone, email')
+    .select('name, title, photo_url, cell_phone, telnyx_number, office_phone, email')
     .eq('name', HOUSE_DEFAULT_AGENT_NAME).eq('active', true).maybeSingle()
   if (!data) return null
   return {
@@ -103,13 +103,13 @@ async function resolveAssignedAgent(sb: any, email: string | null) {
   let agent: any = null
   if (contact.assigned_to_id != null) {
     const { data } = await sb.from('agents')
-      .select('name, title, photo_url, cell_phone, office_phone, email, active, fub_id')
+      .select('name, title, photo_url, cell_phone, telnyx_number, office_phone, email, active, fub_id')
       .eq('fub_id', contact.assigned_to_id).eq('active', true).maybeSingle()
     agent = data
   }
   if (!agent && contact.assigned_to) {
     const { data } = await sb.from('agents')
-      .select('name, title, photo_url, cell_phone, office_phone, email, active')
+      .select('name, title, photo_url, cell_phone, telnyx_number, office_phone, email, active')
       .eq('name', contact.assigned_to).eq('active', true).maybeSingle()
     agent = data
   }
@@ -118,7 +118,7 @@ async function resolveAssignedAgent(sb: any, email: string | null) {
     name: agent.name,
     title: agent.title,
     photo_url: agent.photo_url,
-    phone: agent.cell_phone || agent.office_phone,
+    phone: agent.telnyx_number || agent.office_phone || agent.cell_phone,
     email: agent.email,
     slug: agentSlug(agent.name),
   }

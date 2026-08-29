@@ -395,7 +395,7 @@ export default function SellingPage() {
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 10, color: TEAL, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: DISPLAY, marginBottom: 4 }}>El Cid Specialist</div>
               <div style={{ fontFamily: DISPLAY, fontSize: 17, fontWeight: 800, color: NAVY, marginBottom: 8 }}>Patrick Lafferty</div>
-              <a href="tel:5616034329" style={{ display: 'block', color: NAVY, fontFamily: DISPLAY, fontSize: 13, fontWeight: 700, textDecoration: 'none', marginBottom: 3 }}>📞 561.603.4329</a>
+              <a href="tel:5613630202" style={{ display: 'block', color: NAVY, fontFamily: DISPLAY, fontSize: 13, fontWeight: 700, textDecoration: 'none', marginBottom: 3 }}>📞 561.363.0202</a>
               <a href="mailto:patrick@modernlivingre.com" style={{ color: TEAL, fontFamily: BODY, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>patrick@modernlivingre.com</a>
             </div>
           </div>

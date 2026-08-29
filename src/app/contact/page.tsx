@@ -155,7 +155,7 @@ export default function ContactPage() {
                   Founding Agent · 18-year Downtown West Palm Beach specialist · Modern Living Group at Compass
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <a href="tel:5616034329" style={{ padding: '8px 14px', background: NAVY, color: '#fff', textDecoration: 'none', borderRadius: 8, fontFamily: DISPLAY, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>📞 561.603.4329</a>
+                  <a href="tel:5613630202" style={{ padding: '8px 14px', background: NAVY, color: '#fff', textDecoration: 'none', borderRadius: 8, fontFamily: DISPLAY, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>📞 561.363.0202</a>
                   <a href="mailto:patrick@modernlivingre.com" style={{ padding: '8px 14px', background: '#f1f5f9', color: NAVY, textDecoration: 'none', borderRadius: 8, fontFamily: DISPLAY, fontSize: 11, fontWeight: 700 }}>✉ Email</a>
                 </div>
               </div>
