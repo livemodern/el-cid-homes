@@ -54,7 +54,7 @@ export default function ListingClient({ mcImgs, lbImgs, lng, lat, price, hoa }: 
     // (.lb img max-width), so a single honest src renders full-size + stays light.
     const lbW = () => Math.min(Math.round((window.innerWidth || 1280) * (window.devicePixelRatio || 1)), 1920)
     const lbSrc = (u: string, w: number) =>
-      /\/cdn-cgi\/image\/[^/]*width=\d+/.test(u) ? u.replace(/width=\d+/, 'width=' + w) : u
+      (() => { const vm = u.match(/^(https:\/\/images\.mlrecloud\.com\/img\/)\d+(\/.+)$/); if (vm) return vm[1] + ([640, 828, 1200, 1920].find(v => w <= v) ?? 1920) + vm[2]; return /\/cdn-cgi\/image\/[^/]*width=\d+/.test(u) ? u.replace(/width=\d+/, 'width=' + w) : u })()
     const lbPreload = (j: number) => { const n = lbImgs.length; if (!n) return; const k = (j + n) % n
       const pre = new Image(); pre.src = lbSrc(lbImgs[k], lbW()) }
     const lbShow = () => {

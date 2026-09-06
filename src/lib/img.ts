@@ -22,6 +22,15 @@ import { BUILDING_NAME } from '@/lib/building';
 
 export const CF_IMAGES_HOST = 'images.mlrecloud.com';
 
+// ── Static variant routing (Sept 2026) ─────────────────────────────────
+// Cloudflare bills $0.50/1,000 UNIQUE originals transformed PER MONTH via
+// /cdn-cgi/image — $800+/mo fleet-wide (Jul + Aug invoices). R2 sources now
+// go to the img-variants Worker at images.mlrecloud.com/img/{w}/{key}: a
+// persisted webp served from R2 (free), transformed at most ONCE ever on
+// first human view. Widths MUST match the worker's allowed set.
+export const VARIANT_WIDTHS = [640, 828, 1200, 1920] as const;
+export const snapW = (w: number): number => VARIANT_WIDTHS.find(v => w <= v) ?? 1920;
+
 // Hero <img> and its server-rendered preload (app/page.tsx) MUST share these
 // widths + sizes so the browser resolves the SAME srcset candidate for both.
 // A mismatch means the hero downloads twice — the exact bug this replaced
@@ -60,7 +69,8 @@ export function imgOpt(url: string | undefined | null, width: number, quality: n
     // every listing image URL will live on this host).
     if (u.hostname === CF_IMAGES_HOST) {
       const path = u.pathname.replace(/^\/+/, '');
-      return `https://${CF_IMAGES_HOST}/cdn-cgi/image/width=${width},quality=${quality},format=auto/${path}`;
+      if (path.startsWith('img/')) return url; // already a static variant URL
+      return `https://${CF_IMAGES_HOST}/img/${snapW(width)}/${path}`;
     }
 
     // Trestle/Cotality requires OAuth, so route through our server-side proxy
