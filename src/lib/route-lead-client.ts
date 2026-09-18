@@ -35,7 +35,7 @@ export interface RouteLeadInput {
 
 export interface RouteLeadResult {
   agent_id: string | null
-  agent: { id: string; name: string; email: string | null; cell_phone: string | null; twilio_phone_number: string | null } | null
+  agent: { id: string; name: string; email: string | null; cell_phone: string | null } | null
   reason: string
   matched_rule_id: string | null
   team_id: string | null

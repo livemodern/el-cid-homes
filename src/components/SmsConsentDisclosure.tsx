@@ -5,13 +5,13 @@
 //
 // Why a checkbox (not just disclosure text): A2P 10DLC reviewers reject
 // campaigns whose registration forms imply consent ("by entering your
-// number, you agree…"). Twilio error 30925: "opt-in checkbox is missing
+// number, you agree…"). Carrier campaign rejection "opt-in checkbox is missing
 // or appears to be pre-selected." Carriers want explicit, separately-
 // clicked, unchecked-by-default consent. This is also TCPA "express
 // written consent" — the gold standard for SMS opt-in evidence.
 //
 // Mirror of mlg-site/src/components/SmsConsentDisclosure.tsx — keep in
-// lockstep. Disclosure text MUST match the text quoted in the Twilio
+// lockstep. Disclosure text MUST match the text quoted in the Telnyx/TCR
 // A2P campaign message_flow field verbatim, or the carrier reviewer
 // rejects for mismatch (error 30891).
 
@@ -24,9 +24,9 @@ const BODY  = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, san
 
 // Privacy URL on the canonical public brand domain — modernlivingre.com,
 // not mlrecloud.com (mlrecloud.com is internal infra and would fail the
-// Twilio brand-verification check, contributing to 30891). Cross-check
+// brand-verification check, a common campaign rejection). Cross-check
 // between what appears here and what's on the campaign is exactly what
-// Twilio reviewers verify; keep this URL in lockstep with the campaign's
+// reviewers verify; keep this URL in lockstep with the campaign's
 // Privacy Policy URL field. Patrick 2026-06-29.
 const PRIVACY_URL = 'https://www.modernlivingre.com/privacy-policy'
 

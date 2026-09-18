@@ -54,7 +54,7 @@ function ContactForm({ type }: { type: 'buy' | 'sell' }) {
       <textarea style={{ ...inp, resize: 'none', height: 100 }}
         placeholder={type === 'buy' ? 'What are you looking for? (beds, budget, timeline…)' : 'Tell us about your home (address, timeline, questions…)'}
         value={form.message} onChange={set('message')} />
-      {/* Twilio A2P consent disclosure — required when the form collects
+      {/* A2P consent disclosure — required when the form collects
           a phone number. Must match the disclosure quoted in the A2P
           campaign message_flow text verbatim. */}
       <SmsConsentDisclosure style={{ textAlign: 'center', marginTop: 4, marginBottom: 14 }} />
