@@ -32,7 +32,7 @@ export default function Footer() {
         <div style={{ maxWidth: 320 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="https://images.mlrecloud.com/cdn-cgi/image/width=520,quality=90,format=auto/https://images.mlrecloud.com/brand/mlg-compass-white.webp"
+            src="https://images.mlrecloud.com/img/640/brand/mlg-compass-white.webp"
             alt="Modern Living Group at Compass"
             style={{ height: 46, width: 'auto', display: 'block' }}
           />
