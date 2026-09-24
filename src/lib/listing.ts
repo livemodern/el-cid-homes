@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 // plus trestle_raw for fallback while Claude Code's backfill is in flight. Once
 // backfill is 100%, trestle_raw can be removed from this list for the speed win.
 const COL_LIST = [
-  'mls_id', 'listing_id', 'list_price', 'original_list_price', 'close_price',
+  'mls_id', 'listing_id', 'list_price', 'original_list_price', 'close_price', 'close_date',
   'beds', 'baths', 'sqft', 'building_area_total', 'unit_number', 'street_address',
   'city', 'state', 'zip', 'latitude', 'longitude', 'description', 'image_urls', 'status',
   'hoa_fee', 'days_on_market', 'year_built', 'property_subtype', 'property_type',
