@@ -161,7 +161,11 @@ export default async function ListingPage({ params }: { params: any }) {
   const lng = l.longitude ?? -80.0520, lat = l.latitude ?? 26.6918
 
   const _vtRaw = l.vtour_unbranded || l.vtour_branded
-  const vtUrl = (typeof _vtRaw === 'string' && _vtRaw.startsWith('http')) ? _vtRaw : null
+  // Filter MLS auto-generated tour hosts Patrick considers fake/broken.
+  // propertypanorama.com is the biggest offender (canned photo slideshows
+  // that look like real 3D tours in the UI). Expand this regex as more show up.
+  const _isFakeTour = (u: string) => /propertypanorama\.com/i.test(u)
+  const vtUrl = (typeof _vtRaw === 'string' && _vtRaw.startsWith('http') && !_isFakeTour(_vtRaw)) ? _vtRaw : null
 
   const _det = propertyDetailsFor(l as any)
   const detail: [string, string][] = [..._det.mainFields, ..._det.moreFields]

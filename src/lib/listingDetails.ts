@@ -182,14 +182,12 @@ export function propertyDetailsFor(l: any): DetailResult {
     mainFields.push(['HOA Fee', l?.hoa_fee ? _money(l.hoa_fee) + '/mo' : 'N/A']);
     if (raw.EntryLevel != null && raw.EntryLevel !== '') mainFields.push(['Floor', String(raw.EntryLevel)]);
     mainFields.push(['Year Built', l?.year_built ?? 'N/A']);
-    const fl = _humanizeCsv(raw.Flooring); if (fl) mainFields.push(['Flooring', fl]);
     const pets = _petsLabel(raw); if (pets) mainFields.push(['Pets', pets]);
     if (l?.building_name || l?.subdivision_name) mainFields.push(['Building', l.building_name || l.subdivision_name]);
   } else if (kind === 'townhouse') {
     mainFields.push(['HOA Fee', l?.hoa_fee ? _money(l.hoa_fee) + '/mo' : 'N/A']);
     if (_lot) mainFields.push(['Lot Size', _lot]);
     mainFields.push(['Year Built', l?.year_built ?? 'N/A']);
-    const fl = _humanizeCsv(raw.Flooring); if (fl) mainFields.push(['Flooring', fl]);
     const pets = _petsLabel(raw); if (pets) mainFields.push(['Pets', pets]);
     if (l?.building_name || l?.subdivision_name) mainFields.push(['Building', l.building_name || l.subdivision_name]);
   } else {
@@ -198,7 +196,6 @@ export function propertyDetailsFor(l: any): DetailResult {
     mainFields.push(['Pool', l?.pool_private ? 'Yes' : 'No']);
     mainFields.push(['Garage', l?.garage_spaces ? String(l.garage_spaces) : (l?.parking_total ? String(l.parking_total) : 'None')]);
     const con = _humanizeCsv(raw.ConstructionMaterials); if (con) mainFields.push(['Construction', con]);
-    const fl  = _humanizeCsv(raw.Flooring); if (fl) mainFields.push(['Flooring', fl]);
   }
   mainFields.push(['Days on Market', l?.days_on_market ?? 'N/A']);
   mainFields.push(['Property Type',  l?.property_subtype || '—']);
@@ -208,6 +205,7 @@ export function propertyDetailsFor(l: any): DetailResult {
   moreFields.push(['Status', l?.status || '—']);
   if (l?.original_list_price) moreFields.push(['Original List Price', _fmt(l.original_list_price)]);
   if (l?.close_price)         moreFields.push(['Close Price', _fmt(l.close_price)]);
+  if (l?.close_date)          moreFields.push(['Close Date',  _fmtDate(l.close_date) || String(l.close_date).slice(0, 10)]);
   if (l?.building_area_total && l.building_area_total !== l.sqft) moreFields.push(['Total Sq Ft', Number(l.building_area_total).toLocaleString()]);
   if (l?.subdivision_name && kind !== 'condo') moreFields.push(['Subdivision', l.subdivision_name]);
   if (kind === 'sfr' && l?.architectural_style) moreFields.push(['Style', l.architectural_style]);
@@ -229,6 +227,7 @@ export function propertyDetailsFor(l: any): DetailResult {
   if (raw.ElementarySchool)     moreFields.push(['Elementary School', raw.ElementarySchool]);
   if (raw.MiddleOrJuniorSchool) moreFields.push(['Middle School',     raw.MiddleOrJuniorSchool]);
   if (raw.HighSchool)           moreFields.push(['High School',       raw.HighSchool]);
+  { const fl = _humanizeCsv(raw.Flooring); if (fl) moreFields.push(['Flooring', fl]); }
   moreFields.push(['City', l?.city || '—']);
   moreFields.push(['Zip Code', l?.zip || '—']);
 
@@ -255,7 +254,6 @@ function _mfDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResult {
   mainFields.push(['Inside Sq Ft', l?.sqft ? l.sqft.toLocaleString() : 'N/A']);
   mainFields.push(['Year Built', l?.year_built ?? 'N/A']);
   const con = _humanizeCsv(raw.ConstructionMaterials); if (con) mainFields.push(['Construction', con]);
-  const fl  = _humanizeCsv(raw.Flooring); if (fl) mainFields.push(['Flooring', fl]);
   if (raw.Zoning) mainFields.push(['Zoning', String(raw.Zoning)]);
   if (raw.LotSizeDimensions) mainFields.push(['Lot Dimensions', String(raw.LotSizeDimensions)]);
   mainFields.push(['Property Type', l?.property_subtype || 'Multi-Family']);
@@ -265,6 +263,7 @@ function _mfDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResult {
   moreFields.push(['Status', l?.status || '—']);
   if (l?.original_list_price) moreFields.push(['Original List Price', _fmt(l.original_list_price)]);
   if (l?.close_price)         moreFields.push(['Close Price', _fmt(l.close_price)]);
+  if (l?.close_date)          moreFields.push(['Close Date',  _fmtDate(l.close_date) || String(l.close_date).slice(0, 10)]);
   const grm = _grm(l); if (grm) moreFields.push(['GRM', grm]);
   if (raw.TenantPays) moreFields.push(['Tenant Pays', (String(raw.TenantPays) === 'None') ? 'Owner pays all utilities' : (_humanizeCsv(raw.TenantPays) || 'Owner pays all utilities')]);
   const _st = l?.stories ?? raw.Stories; if (_st) moreFields.push(['Stories', _st]);
@@ -274,6 +273,7 @@ function _mfDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResult {
   if (l?.view) moreFields.push(['View', l.view]);
   moreFields.push(['Days on Market', l?.days_on_market ?? 'N/A']);
   if (l?.tax_annual) moreFields.push(['Annual Taxes', _money(l.tax_annual)]);
+  { const fl = _humanizeCsv(raw.Flooring); if (fl) moreFields.push(['Flooring', fl]); }
   moreFields.push(['City', l?.city || '—']);
   moreFields.push(['Zip Code', l?.zip || '—']);
 
@@ -307,6 +307,7 @@ function _landDetails(l: any, _fmt: (n: any) => string, _lot: string | null, raw
   const moreFields: [string, string | number][] = [];
   if (l?.original_list_price) moreFields.push(['Original List Price', _fmt(l.original_list_price)]);
   if (l?.close_price)         moreFields.push(['Close Price', _fmt(l.close_price)]);
+  if (l?.close_date)          moreFields.push(['Close Date',  _fmtDate(l.close_date) || String(l.close_date).slice(0, 10)]);
   if (l?.subdivision_name)    moreFields.push(['Subdivision', l.subdivision_name]);
   const rs = _humanizeCsv(raw.RoadSurfaceType);  if (rs) moreFields.push(['Road Surface', rs]);
   const rf = _humanizeCsv(raw.RoadFrontageType); if (rf) moreFields.push(['Road Frontage', rf]);
@@ -316,6 +317,7 @@ function _landDetails(l: any, _fmt: (n: any) => string, _lot: string | null, raw
   if (l?.view) moreFields.push(['View', l.view]);
   if (l?.tax_annual) moreFields.push(['Annual Taxes', _money(l.tax_annual)]);
   if (l?.direction_faces) moreFields.push(['Direction Faces', l.direction_faces]);
+  { const fl = _humanizeCsv(raw.Flooring); if (fl) moreFields.push(['Flooring', fl]); }
   moreFields.push(['City', l?.city || '—']);
   moreFields.push(['Zip Code', l?.zip || '—']);
 
@@ -374,6 +376,7 @@ function _rentalDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResul
   if (l?.hoa_fee) moreFields.push(['HOA Fee', '$' + Math.round(l.hoa_fee).toLocaleString() + '/mo']);
   const _tp = _humanizeCsv(l?.tenant_pays);
   if (_tp) moreFields.push(['Tenant Pays', _tp]);
+  { const fl = _humanizeCsv(raw.Flooring); if (fl) moreFields.push(['Flooring', fl]); }
   moreFields.push(['City', l?.city || '—']);
   moreFields.push(['Zip Code', l?.zip || '—']);
 
