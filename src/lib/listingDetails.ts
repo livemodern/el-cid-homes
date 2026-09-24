@@ -364,6 +364,7 @@ function _rentalDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResul
 
   const moreFields: [string, string | number][] = [];
   moreFields.push(['Status', l?.status || '—']);
+  if (l?.close_date) moreFields.push(['Close Date', _fmtDate(l.close_date) || String(l.close_date).slice(0, 10)]);
   if (l?.subdivision_name) moreFields.push(['Subdivision', l.subdivision_name]);
   if (l?.stories) moreFields.push(['Stories', l.stories]);
   if (l?.pool_private != null) moreFields.push(['Pool', l.pool_private ? 'Yes' : 'No']);
