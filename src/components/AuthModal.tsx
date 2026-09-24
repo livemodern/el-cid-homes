@@ -55,8 +55,16 @@ export function AuthModal({
     setBusy(true);
     try {
       if (mode === 'forgot') {
+        // Send resets to team.mlrecloud.com/auth/reset-password. The old
+        // target (search.mlrecloud.com/account) went to mlg-search, which was
+        // retired to 503 — password reset was silently broken fleet-wide for
+        // every mini-site clone that inherited this line. mlg-admin's
+        // reset-password page is hardened for both PKCE + implicit recovery
+        // flows and is in the middleware allowlist so unauthenticated users
+        // can reach it. Same Supabase project → the recovery token works
+        // cross-domain. (Patrick 2026-08-21; last-4 fixed 2026-09-24)
         const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
-          redirectTo: 'https://search.mlrecloud.com/account',
+          redirectTo: 'https://team.mlrecloud.com/auth/reset-password',
         });
         if (error) { setError(error.message); setBusy(false); return; }
         setResetSent(true);
