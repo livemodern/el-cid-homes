@@ -28,7 +28,13 @@ async function run({ type, status, includeRaw, closedCutoff }: Params) {
     .select(cols)
     .eq('community_slug', 'el-cid-west-palm-beach')
     .eq('dup_suppressed', false)
+    // Newest first within each status: on_market_date for Actives, close_date
+    // for Closed/Leased. Price is the tie-breaker. Patrick 2026-09-24: leased
+    // grid was sorted by price DESC, so 10-year-old $3k leases showed above
+    // last week's closes.
     .order('status', { ascending: true })
+    .order('on_market_date', { ascending: false, nullsFirst: false })
+    .order('close_date', { ascending: false, nullsFirst: false })
     .order('list_price', { ascending: false })
     .limit(300)
 
@@ -59,7 +65,7 @@ async function run({ type, status, includeRaw, closedCutoff }: Params) {
 // Key bumped :grid → :grid-v2 (2026-07-02) to flush pre-trim cached
 // entries after the card-payload photo cap landed — otherwise stale
 // full-gallery payloads serve for up to an hour post-deploy.
-const cached = unstable_cache(run, ['listings:el-cid:grid-v4'], {
+const cached = unstable_cache(run, ['listings:el-cid-homes:grid-v5'], {
   tags: [TAGS.LISTINGS_TCP],
   revalidate: 60,
 })
@@ -71,7 +77,11 @@ export async function getGridListings(
   // Compute the 3yr cutoff outside the cached fn so the cache key is stable
   // for the whole calendar day (matches the API handler).
   let closedCutoff: string | null = null
-  if (status === 'Closed' || type === 'sale') {
+  // Cap Closed rows at 3 years, applied for BOTH sale and rent grids.
+  // The rent grid used to skip this branch entirely, so /for-rent's
+  // "Leased" tab showed every lease at the building since 2014 — Patrick
+  // 2026-09-24. 3 years matches the sale-side cap.
+  if (status === 'Closed' || type === 'sale' || type === 'rent') {
     const t = new Date()
     t.setFullYear(t.getFullYear() - 3)
     closedCutoff = t.toISOString().slice(0, 10)
