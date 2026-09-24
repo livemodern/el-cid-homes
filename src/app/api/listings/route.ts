@@ -31,8 +31,12 @@ async function runQuery({ type, status, includeRaw, closedCutoff }: Params) {
     .select(cols)
     .eq('community_slug', 'el-cid-west-palm-beach')
     .eq('dup_suppressed', false)
-    .order('status',     { ascending: true })
-    .order('list_price', { ascending: false })
+    // Newest first within status: on_market_date (Actives), close_date
+    // (Closed/Leased). Price is the tie-breaker. Patrick 2026-09-24.
+    .order('status',           { ascending: true })
+    .order('on_market_date',   { ascending: false, nullsFirst: false })
+    .order('close_date',       { ascending: false, nullsFirst: false })
+    .order('list_price',       { ascending: false })
     .limit(300);
 
   if (type === 'rent') query = query.lt('list_price', 50000);
@@ -76,7 +80,7 @@ async function runQuery({ type, status, includeRaw, closedCutoff }: Params) {
 // path for include_raw=true and runs the query directly.
 const cachedQuery = unstable_cache(
   runQuery,
-  ['listings:el-cid-v2'],  // bumped 2026-07-02 to flush pre-trim cache
+  ['listings:el-cid-homes-v3'],  // bumped 2026-07-02 to flush pre-trim cache
   {
     tags: [TAGS.LISTINGS_TCP],
     revalidate: 3600,
@@ -92,7 +96,10 @@ export async function GET(req: NextRequest) {
   // Compute the 3yr closed-cutoff in the handler (not in the cached fn) so
   // the cache key is stable for the whole calendar day.
   let closedCutoff: string | null = null;
-  if (status === 'Closed' || type === 'sale') {
+  // Cap Closed rows at 3 years for BOTH sale AND rent grids. Rent used
+  // to skip this branch, so /for-rent's Leased tab pulled every lease
+  // since 2014. Patrick 2026-09-24.
+  if (status === 'Closed' || type === 'sale' || type === 'rent') {
     const t = new Date();
     t.setFullYear(t.getFullYear() - 3);
     closedCutoff = t.toISOString().slice(0, 10);
