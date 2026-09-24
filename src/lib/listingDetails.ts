@@ -342,8 +342,15 @@ function _rentalDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResul
     mainFields.push(['Total Sq Ft', Number(l.building_area_total).toLocaleString()]);
   }
   mainFields.push(['Year Built', l?.year_built ?? 'N/A']);
+  // Only show "Available" on listings actually on the market. availability_date
+  // is the original MLS first-available date, which for a re-listed unit can
+  // be years old ("Available: Oct 1, 2015" on a 2025 lease). Confusing on a
+  // Closed/leased/pending listing where the unit isn't available at all.
+  // Patrick 2026-09-24.
   const _avail = _fmtDate(l?.availability_date);
-  if (_avail) mainFields.push(['Available', _avail]);
+  if (_avail && (l?.status === 'Active' || l?.status === 'ComingSoon')) {
+    mainFields.push(['Available', _avail]);
+  }
   if (l?.furnished) mainFields.push(['Furnished', l.furnished]);
   if (l?.lease_amount_frequency) mainFields.push(['Lease Term', l.lease_amount_frequency]);
   if (raw.SecurityDeposit) mainFields.push(['Security Deposit', '$' + Math.round(Number(raw.SecurityDeposit)).toLocaleString()]);
