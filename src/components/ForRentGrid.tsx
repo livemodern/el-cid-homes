@@ -52,6 +52,26 @@ export default function ForRentGrid({ initialListings, initialError }: { initial
   const [sort,       setSort]       = useState('dom_asc');
   const [minBeds,    setMinBeds]    = useState(0);
 
+  // Restore filter state from sessionStorage on mount — so clicking a leased
+  // listing and hitting Back preserves the Leased tab + beds/sort selection.
+  // Mirrors ForSaleGrid's pattern (which already had this). Patrick 2026-09-24.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('mlg_forrent_state');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.tab && (s.tab === 'Available' || s.tab === 'Leased' || s.tab === 'All')) setTab(s.tab);
+        if (s.sort) setSort(s.sort);
+        if (s.minBeds != null) setMinBeds(s.minBeds);
+      }
+    } catch {}
+  }, []);
+
+  // Persist filter state whenever it changes.
+  useEffect(() => {
+    try { sessionStorage.setItem('mlg_forrent_state', JSON.stringify({ tab, sort, minBeds })); } catch {}
+  }, [tab, sort, minBeds]);
+
   // Bucket rather than string-match — a ComingSoon rental is Available, not a
   // ghost that only surfaces under "All". Off-market rows never render.
   const marketable = listings.filter(l => isMarketable(l.status));
