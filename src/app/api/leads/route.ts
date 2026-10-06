@@ -41,6 +41,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email or phone required' }, { status: 400 });
     }
 
+    // A showing request needs a real phone number: the agent has to confirm the
+    // time and access with them (Patrick 2026-10-06; "NA" got through as a
+    // phone on onecityplazacondos.com, 2026-10-05). The form checks this too;
+    // this is the guard for anything that skips the browser. US 10-digit
+    // (optionally +1/1), or + and 11-15 digits for international.
+    if (showingDate || showingTime || showingType) {
+      const raw = String(phone ?? '').trim();
+      const digits = raw.replace(/\D/g, '');
+      const ok = digits.length === 10
+        || (digits.length === 11 && digits.startsWith('1'))
+        || (raw.startsWith('+') && digits.length >= 11 && digits.length <= 15);
+      if (!ok) {
+        return NextResponse.json(
+          { error: 'phone', message: 'Please enter a valid phone number so we can confirm your showing.' },
+          { status: 400 },
+        );
+      }
+    }
+
     let first = firstName, last = lastName;
     if (!first && name) {
       const parts = String(name).trim().split(' ');

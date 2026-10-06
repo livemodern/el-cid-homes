@@ -28,6 +28,13 @@ export default function RequestShowing({ listing }: { listing: any }) {
   const [step, setStep] = useState<'pick' | 'form' | 'done'>('pick')
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '' })
   const [profileLoaded, setProfileLoaded] = useState(false)
+  const [phoneError, setPhoneError] = useState('')
+  // US 10-digit (optionally +1/1), or + and 11-15 digits for international.
+  // A showing needs a number the agent can actually call (Patrick 2026-10-06).
+  const validPhone = (p: string) => {
+    const raw = p.trim(); const d = raw.replace(/\D/g, '')
+    return d.length === 10 || (d.length === 11 && d.startsWith('1')) || (raw.startsWith('+') && d.length >= 11 && d.length <= 15)
+  }
 
   const times = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM']
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -56,8 +63,12 @@ export default function RequestShowing({ listing }: { listing: any }) {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
+    if (!validPhone(form.phone)) {
+      setPhoneError('Please enter a valid phone number so we can confirm your showing.')
+      return
+    }
     try {
-      await fetch('/api/leads', {
+      const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,6 +87,10 @@ export default function RequestShowing({ listing }: { listing: any }) {
           siteSlug: 'el-cid-homes',
         }),
       })
+      if (res.status === 400) {
+        const j = await res.json().catch(() => ({} as any))
+        if (j?.error === 'phone') { setPhoneError(j.message || 'Please enter a valid phone number.'); return }
+      }
       setStep('done')
     } catch {
       setStep('done')
@@ -191,7 +206,8 @@ export default function RequestShowing({ listing }: { listing: any }) {
             <input placeholder="Last Name" value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} style={{ padding: '11px 14px', borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: BODY, fontSize: 13, outline: 'none' }} />
           </div>
           <input required type="email" placeholder="Email Address" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} style={{ padding: '11px 14px', borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: BODY, fontSize: 13, outline: 'none' }} />
-          <input required placeholder="Phone Number" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} style={{ padding: '11px 14px', borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: BODY, fontSize: 13, outline: 'none' }} />
+          <input required type="tel" inputMode="tel" autoComplete="tel" placeholder="Phone Number" aria-invalid={!!phoneError} value={form.phone} onChange={e => { setPhoneError(''); setForm(f => ({ ...f, phone: e.target.value })) }} style={{ ...{ padding: '11px 14px', borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: BODY, fontSize: 13, outline: 'none' }, ...(phoneError ? { borderColor: '#dc2626' } : {}) }} />
+          {phoneError && <div role="alert" style={{ color: '#dc2626', fontSize: 12, marginTop: -4 }}>{phoneError}</div>}
           <button type="submit" style={{ background: TEAL, color: '#fff', border: 'none', padding: '13px', borderRadius: 10, fontFamily: DISPLAY, fontSize: 15, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(0,178,204,0.35)' }}>
             Confirm Showing Request
           </button>
