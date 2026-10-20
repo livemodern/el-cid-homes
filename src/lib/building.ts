@@ -14,4 +14,4 @@ export const BUILDING_NAME  = 'El Cid';
 export const COMMUNITY_SLUG = 'el-cid-west-palm-beach';
 export const ALERT_FILTER: Record<string, any> = { community_slug: COMMUNITY_SLUG };
 export const ALERT_KIND = 'home';
-export const ALERT_SOURCE = `community-alert:${{COMMUNITY_SLUG}}`;
+export const ALERT_SOURCE = `community-alert:${COMMUNITY_SLUG}`;
