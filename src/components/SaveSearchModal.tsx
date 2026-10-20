@@ -70,7 +70,7 @@ export default function SaveSearchModal({ filters, location, transaction, onClos
       const res = await fetch('/api/me/saved-searches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ name: name.trim(), filters, location, transaction, alert_frequency: frequency }),
+        body: JSON.stringify({ name: name.trim(), filters, location, transaction, alert_frequency: frequency, source: 'search-page' }),
       });
       if (!res.ok) {
         const d = await res.json();

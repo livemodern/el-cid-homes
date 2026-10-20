@@ -70,6 +70,7 @@ export default function BuildingAlerts({
   buildingName, buildingFilter,
   transaction: initialTransaction = 'sale',
   kind,
+  source = 'community-alert',
   emptyState = false,
 }: Props) {
   const { user, loading } = useUser();
@@ -149,6 +150,7 @@ export default function BuildingAlerts({
           location,
           transaction,
           alert_frequency: frequency,
+          source,
         }),
       });
       return res.ok;

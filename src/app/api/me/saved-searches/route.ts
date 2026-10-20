@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await req.json();
-  const { name, filters, location, transaction, alert_frequency, contact_id } = body;
+  const { name, filters, location, transaction, alert_frequency, contact_id, source } = body;
 
   if (!name?.trim()) return NextResponse.json({ error: 'Name required' }, { status: 400 });
 
@@ -76,6 +76,10 @@ export async function POST(req: NextRequest) {
       location:        location || null,
       transaction:     transaction || 'sale',
       alert_frequency: alert_frequency || 'daily',
+      // Which widget created this row. site_slug records the site; this records
+      // the entry point on it (community-alert:<slug> vs search-page). Null-safe:
+      // a client that doesn't send it leaves the column NULL.
+      source:          typeof source === 'string' && source.trim() ? source.trim().slice(0, 64) : null,
       alert_email:     true, // boolean opt-in flag — drip emails the linked contact (contact_id), not a stored address
       site_slug:       process.env.NEXT_PUBLIC_SITE_SLUG || 'el-cid-homes',
     })
