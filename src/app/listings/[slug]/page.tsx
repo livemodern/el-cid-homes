@@ -113,7 +113,16 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
   const desc = (l.description || `${l.beds ?? ''} bed ${l.baths ?? ''} bath residence at ${bld}, ${l.city}, FL.`)
     .replace(/\s+/g, ' ').slice(0, 180)
   const canonicalSlug = slugifyListing(l as any)
-  const ogImage = l.image_urls?.[0] ? imgOpt(l.image_urls[0], 1200) : undefined
+  // Share preview = 1200x630 JPEG crop. imgOpt(…, 1200) returns the static
+  // /img/ WebP variant, and iMessage and other link previews don't show WebP,
+  // so listing links texted since the Sep image-cost work had no photo
+  // (Patrick 2026-10-21). A photo not yet on R2 keeps imgOpt's raw path.
+  // height=630 is the WAF's one allowed /cdn-cgi/image shape.
+  const firstPhoto = l.image_urls?.[0]
+  const r2Path = firstPhoto?.match(/^https:\/\/images\.mlrecloud\.com\/(?:img\/\d+\/)?((?!cdn-cgi\/).+)$/)?.[1]
+  const ogImage = r2Path
+    ? { url: `https://images.mlrecloud.com/cdn-cgi/image/width=1200,height=630,fit=cover,quality=82,format=jpeg/${r2Path}`, width: 1200, height: 630, alt: title }
+    : firstPhoto ? imgOpt(firstPhoto, 1200) : undefined
   // Drop off-market listings from the index so they stop competing with live
   // inventory in search results. follow stays true — the similar-listings
   // links below are still worth crawling.
@@ -134,6 +143,8 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
       title, description: desc, url: `${SITE_URL}/listings/${canonicalSlug}`,
       type: 'website', images: ogImage ? [ogImage] : [],
     },
+    // Without this X fell back to the layout's building hero for every listing.
+    twitter: { card: 'summary_large_image' as const, title, description: desc, images: ogImage ? [ogImage] : [] },
   }
 }
 
