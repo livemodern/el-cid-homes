@@ -77,8 +77,13 @@ export function imgOpt(url: string | undefined | null, width: number, quality: n
     // and chain that proxy URL through Vercel's image optimizer to get
     // resize + AVIF/WebP conversion + edge caching.
     if (isTrestleHost(u.hostname)) {
-      const proxied = `/api/proxy/image?url=${encodeURIComponent(url)}`;
-      return `/_next/image?url=${encodeURIComponent(proxied)}&w=${width}&q=${quality}`;
+      // 2026-11-10: emit the Cotality URL untouched. /api/proxy/image fetches
+      // a Trestle bearer token first, and this project's stored Trestle
+      // credentials are now rejected (400 invalid_client), so every proxied
+      // photo 500'd and a new listing showed broken images until migrate-r2
+      // moved it to R2. Cotality media URLs need no token: they 302 to a
+      // signed media-cdn object for any client. Same fix as mlg-site 415bc2d.
+      return url;
     }
   } catch {
     // Not a parseable absolute URL — fall through to optimizer fallback.
