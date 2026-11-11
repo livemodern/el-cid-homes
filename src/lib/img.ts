@@ -39,10 +39,8 @@ export const snapW = (w: number): number => VARIANT_WIDTHS.find(v => w <= v) ?? 
 export const HERO_WIDTHS = [768, 1080, 1440, 1920, 2560];
 export const HERO_SIZES = '100vw';
 
-// MLS photo CDNs that require our server-side auth proxy. SHARED with
-// app/api/proxy/image/route.ts — the proxy must accept exactly this set
-// and nothing else (it attaches our Trestle bearer token to the fetch,
-// so a loose check would hand the token to an attacker-controlled host).
+// MLS photo CDN hostnames (Trestle/Cotality). Photos on these hosts are
+// served as the raw vendor URL until migrate-r2 moves them to R2.
 // Strict suffix match on the HOSTNAME — `url.includes('cotality.com')`
 // style checks match evil.com/?x=cotality.com.
 const TRESTLE_HOSTS = ['cotality.com', 'paragonrels.com'];
@@ -73,16 +71,14 @@ export function imgOpt(url: string | undefined | null, width: number, quality: n
       return `https://${CF_IMAGES_HOST}/img/${snapW(width)}/${path}`;
     }
 
-    // Trestle/Cotality requires OAuth, so route through our server-side proxy
-    // and chain that proxy URL through Vercel's image optimizer to get
-    // resize + AVIF/WebP conversion + edge caching.
     if (isTrestleHost(u.hostname)) {
-      // 2026-11-10: emit the Cotality URL untouched. /api/proxy/image fetches
-      // a Trestle bearer token first, and this project's stored Trestle
-      // credentials are now rejected (400 invalid_client), so every proxied
-      // photo 500'd and a new listing showed broken images until migrate-r2
-      // moved it to R2. Cotality media URLs need no token: they 302 to a
-      // signed media-cdn object for any client. Same fix as mlg-site 415bc2d.
+      // Trestle-hosted photos (the ~20 min before migrate-r2 moves a new
+      // listing to R2) go out as the raw Cotality URL. Cotality media URLs
+      // need no token: they 302 to a signed media-cdn object for any client.
+      // There is NO image proxy any more: /api/proxy/image and the
+      // mls-image-proxy Worker were deleted 2026-11-11 after their Trestle
+      // token call began failing and broke new-listing galleries. Do not
+      // reintroduce a proxy that authenticates.
       return url;
     }
   } catch {
