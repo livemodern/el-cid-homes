@@ -38,9 +38,18 @@ function _humanizeCsv(s: any): string | null {
   return s.split(',')
     .map(p => p.trim()
       .replace(/CableTv/gi, 'Cable TV')
+      .replace(/([A-Z]{2,})([A-Z][a-z])/g, '$1 $2')
       .replace(/([a-z])([A-Z])/g, '$1 $2'))
     .filter(Boolean)
     .join(', ');
+}
+
+// waterfront_features is a raw RESO enum list ("IntracoastalAccess,None,OceanFront").
+// Printed as-is it has no spaces, cannot wrap, and stretched the details card
+// past a phone screen (2026-11-17). Drop the "None" entries and space the rest.
+function _waterfrontLabel(v: any): string | null {
+  if (!v || typeof v !== 'string') return null;
+  return _humanizeCsv(v.split(',').filter(p => p.trim() && p.trim() !== 'None').join(','));
 }
 
 // Pets — single merged smart label. Accepts the trestle_raw object (preferred, so it
@@ -212,8 +221,8 @@ export function propertyDetailsFor(l: any): DetailResult {
   if (kind === 'sfr') { const pets = _petsLabel(raw); if (pets) moreFields.push(['Pets', pets]); }
   if (l?.stories) moreFields.push(['Stories', l.stories]);
   if (l?.waterfront != null) moreFields.push(['Waterfront', l.waterfront ? 'Yes' : 'No']);
-  if (l?.waterfront_features && l.waterfront_features !== 'None') moreFields.push(['Waterfront Features', l.waterfront_features]);
-  if (l?.view) moreFields.push(['View', l.view]);
+  { const wf = _waterfrontLabel(l?.waterfront_features); if (wf) moreFields.push(['Waterfront Features', wf]); }
+  if (l?.view) moreFields.push(['View', _humanizeCsv(l.view) || l.view]);
   if (kind === 'condo' || kind === 'townhouse') {
     const inc = _humanizeCsv(raw.AssociationFeeIncludes); if (inc) moreFields.push(['HOA Includes', inc]);
     const am  = _humanizeCsv(raw.AssociationAmenities);   if (am)  moreFields.push(['Building Amenities', am]);
@@ -269,8 +278,8 @@ function _mfDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResult {
   const _st = l?.stories ?? raw.Stories; if (_st) moreFields.push(['Stories', _st]);
   const _lot = _fmtLotSize(l); if (_lot) moreFields.push(['Lot Size', _lot]);
   if (l?.waterfront != null) moreFields.push(['Waterfront', l.waterfront ? 'Yes' : 'No']);
-  if (l?.waterfront_features && l.waterfront_features !== 'None') moreFields.push(['Waterfront Features', l.waterfront_features]);
-  if (l?.view) moreFields.push(['View', l.view]);
+  { const wf = _waterfrontLabel(l?.waterfront_features); if (wf) moreFields.push(['Waterfront Features', wf]); }
+  if (l?.view) moreFields.push(['View', _humanizeCsv(l.view) || l.view]);
   moreFields.push(['Days on Market', l?.days_on_market ?? 'N/A']);
   if (l?.tax_annual) moreFields.push(['Annual Taxes', _money(l.tax_annual)]);
   { const fl = _humanizeCsv(raw.Flooring); if (fl) moreFields.push(['Flooring', fl]); }
@@ -313,8 +322,8 @@ function _landDetails(l: any, _fmt: (n: any) => string, _lot: string | null, raw
   const rf = _humanizeCsv(raw.RoadFrontageType); if (rf) moreFields.push(['Road Frontage', rf]);
   if (raw.NumberOfLots) moreFields.push(['Number of Lots', raw.NumberOfLots]);
   if (l?.waterfront != null) moreFields.push(['Waterfront', l.waterfront ? 'Yes' : 'No']);
-  if (l?.waterfront_features && l.waterfront_features !== 'None') moreFields.push(['Waterfront Features', l.waterfront_features]);
-  if (l?.view) moreFields.push(['View', l.view]);
+  { const wf = _waterfrontLabel(l?.waterfront_features); if (wf) moreFields.push(['Waterfront Features', wf]); }
+  if (l?.view) moreFields.push(['View', _humanizeCsv(l.view) || l.view]);
   if (l?.tax_annual) moreFields.push(['Annual Taxes', _money(l.tax_annual)]);
   if (l?.direction_faces) moreFields.push(['Direction Faces', l.direction_faces]);
   { const fl = _humanizeCsv(raw.Flooring); if (fl) moreFields.push(['Flooring', fl]); }
@@ -369,8 +378,8 @@ function _rentalDetails(l: any, _fmt: (n: any) => string, raw: any): DetailResul
   if (l?.stories) moreFields.push(['Stories', l.stories]);
   if (l?.pool_private != null) moreFields.push(['Pool', l.pool_private ? 'Yes' : 'No']);
   if (l?.waterfront != null && l.waterfront) moreFields.push(['Waterfront', 'Yes']);
-  if (l?.waterfront_features && l.waterfront_features !== 'None') moreFields.push(['Waterfront Features', l.waterfront_features]);
-  if (l?.view) moreFields.push(['View', l.view]);
+  { const wf = _waterfrontLabel(l?.waterfront_features); if (wf) moreFields.push(['Waterfront Features', wf]); }
+  if (l?.view) moreFields.push(['View', _humanizeCsv(l.view) || l.view]);
   if (l?.garage_spaces)      moreFields.push(['Garage Spaces', l.garage_spaces]);
   else if (l?.parking_total) moreFields.push(['Parking', l.parking_total]);
   if (l?.direction_faces) moreFields.push(['Direction Faces', l.direction_faces]);

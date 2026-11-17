@@ -165,6 +165,12 @@ section { padding:56px 4vw; }
 .dl { display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--off); font-size:13px; color:var(--slate); gap:14px; }
 .dl span { flex-shrink:0; white-space:nowrap; }
 .dl b { color:var(--navy); font-weight:600; font-family:'Plus Jakarta Sans'; text-align:right; }
+/* No detail value may widen the page. A flex/grid item's default min-width is
+   its longest unbreakable word, so one long token ("IntracoastalAccess,None,OceanFront")
+   stretched the row, the card and then the whole page past the phone viewport
+   (2026-11-17). Let every level shrink and let values wrap. Same as mlg-site. */
+.dualgrid > div, .dgrid, .dl { min-width:0; }
+.dl b { min-width:0; overflow-wrap:anywhere; }
 /* Wide rows for multi-value lists (HOA Includes, Building Amenities, etc.)
    — span the full grid and stack label-on-top so long comma-lists don't
    squish the label or break neighboring-row alignment. */
