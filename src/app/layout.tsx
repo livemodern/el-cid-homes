@@ -115,16 +115,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             carrying the identity cookie. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(agentJsonLd) }} />
-        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-          <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`} />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');`,
-              }}
-            />
-          </>
-        )}
+        {/* Google Analytics loads once, from <SiteAnalytics /> in the body. A
+            second loader here configured the same GA4 ID twice; removed 2026-11-20. */}
       </head>
       <body style={{ margin: 0, padding: 0, background: '#0a0a0a' }}>
         <SiteTracker />
